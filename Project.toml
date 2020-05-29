@@ -1,0 +1,18 @@
+name = "CpelTdm"
+uuid = "63cc84f1-2b0d-464a-9e1f-381981f7b89b"
+authors = ["jordiabante <jabante1@jhu.edu>"]
+version = "0.1.0"
+
+[deps]
+BED = "8e4a8c10-cb6b-11e8-08d2-83478d609d67"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FASTX = "c2308a5c-f048-11e8-3e8a-31650f418d12"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+XAM = "d759349c-bcba-11e9-07c2-5b90f8f05f7c"
