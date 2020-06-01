@@ -7,7 +7,7 @@
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234);
-    julia> CpelRrbs.gen_x_mc([5,5],[-0.5,0.5,0.25])
+    julia> CpelTdm.gen_x_mc([5,5],[-0.5,0.5,0.25])
     5-element Array{Int64,1}:
     1
     1
@@ -64,7 +64,7 @@ end # end gen_x_mc
     # Examples
     ```julia-repl
     julia> m = 5; n = [5]; θ1 = [0.5,0.5,0.25]; θ2 = [0.5,0.5,0.25];
-    julia> tmml,tnme,tcmd = CpelRrbs.unmatched_sim(m,n,θ1,θ2)
+    julia> tmml,tnme,tcmd = CpelTdm.unmatched_sim(m,n,θ1,θ2)
     ```
 """
 function unmatched_sim(m::Int64,n::Vector{Int64},θ1::Vector{Float64},θ2::Vector{Float64})::NTuple{3,Vector{NTuple{2,Float64}}}
@@ -125,7 +125,7 @@ end
     # Examples
     ```julia-repl
     julia> m = 5; n = [5]; θ1 = [0.5,0.5,0.25]; θ2 = [0.5,0.5,0.25];
-    julia> tmml,tnme,tcmd = CpelRrbs.matched_sim(m,n,θ1,θ2)
+    julia> tmml,tnme,tcmd = CpelTdm.matched_sim(m,n,θ1,θ2)
     ```
 """
 function matched_sim(m::Int64,n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}})::NTuple{3,Vector{NTuple{2,Float64}}}

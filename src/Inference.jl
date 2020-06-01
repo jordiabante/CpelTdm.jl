@@ -14,7 +14,7 @@ const LOG2 = log(2)                         # Ln(2)
 
     # Examples
     ```julia-repl
-    julia> Ux_fun = CpelRrbs.create_Ux([2,2],[1.0,1.0],1.0);
+    julia> Ux_fun = CpelTdm.create_Ux([2,2],[1.0,1.0],1.0);
     julia> Ux_fun([1,1,1,1])
     -7.0
     ```
@@ -42,7 +42,7 @@ end # end create_Ux
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.get_W(4,0.0,0.0)
+    julia> CpelTdm.get_W(4,0.0,0.0)
     2×2 Array{Float64,2}:
     4.0  4.0
     4.0  4.0
@@ -83,7 +83,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.get_V([1.0,1.0],1.0)
+    julia> CpelTdm.get_V([1.0,1.0],1.0)
     2×2 Array{Float64,2}:
     1.0       0.367879
     0.367879  7.38906
@@ -107,7 +107,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.get_u(0.0)
+    julia> CpelTdm.get_u(0.0)
     2-element Vector{Float64}:
      1.0
      1.0
@@ -130,7 +130,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.comp_Z([1,1,1],[1.0,1.0,1.0],1.0)
+    julia> CpelTdm.comp_Z([1,1,1],[1.0,1.0,1.0],1.0)
     155.37102759254836
     ```
 """
@@ -156,7 +156,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.get_∇logZ([1,1,1],[1.0,-1.0,1.0,0.0])
+    julia> CpelTdm.get_∇logZ([1,1,1],[1.0,-1.0,1.0,0.0])
     4-element Array{Float64,1}:
      0.7615941559702503
      -0.7615941559702503
@@ -183,9 +183,9 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.check_boundary([1.0,1.0,1.0,1.0])
+    julia> CpelTdm.check_boundary([1.0,1.0,1.0,1.0])
     false
-    julia> CpelRrbs.check_boundary([1.0,5.0,1.0,1.0])
+    julia> CpelTdm.check_boundary([1.0,5.0,1.0,1.0])
     true
     ```
 """
@@ -205,7 +205,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.comp_g([1],[1.0],1.0,3.0,3.0)
+    julia> CpelTdm.comp_g([1],[1.0],1.0,3.0,3.0)
     20.135323991555527
     ```
 """
@@ -233,7 +233,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> CpelRrbs.comp_lkhd([1,1,0,1,1],[5],[1.0],1.0)
+    julia> CpelTdm.comp_lkhd([1,1,0,1,1],[5],[1.0],1.0)
     0.953646032691218
     ```
 """
@@ -286,8 +286,8 @@ end
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[4];
-    julia> xobs=[CpelRrbs.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
-    julia> LogLike=CpelRrbs.create_Llkhd(n,xobs);
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
+    julia> LogLike=CpelTdm.create_Llkhd(n,xobs);
     julia> LogLike([0.0,0.0,0.0])
     55.45177444479562
     ```
@@ -356,8 +356,8 @@ end # end create_Llkhd
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[1];
-    julia> xobs=[CpelRrbs.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
-    julia> CpelRrbs.est_alpha(xobs)
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
+    julia> CpelTdm.est_alpha(xobs)
     2-element Array{Float64,1}:
      0.10033534773107566
      0.0
@@ -384,8 +384,8 @@ end # end est_alpha
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[4];
-    julia> xobs=[CpelRrbs.gen_x_mc(n,[0.0],0.0) for _ in 1:100];
-    julia> CpelRrbs.est_theta_sa(n,xobs)
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:100];
+    julia> CpelTdm.est_theta_sa(n,xobs)
     2-element Array{Float64,1}:
      -0.08515675262874925 
      -0.040190205815463766
@@ -423,8 +423,8 @@ end # end est_theta_sa
     # Examples
     ```julia-repl
     julia> n=[1,1,1]; θ=[1.0,-1.0,1.0,0.0];
-    julia> ∇logZ = CpelRrbs.get_∇logZ(n,θ);
-    julia> CpelRrbs.comp_mml(n,∇logZ)
+    julia> ∇logZ = CpelTdm.get_∇logZ(n,θ);
+    julia> CpelTdm.comp_mml(n,∇logZ)
     0.62693236
     ```
 """
@@ -444,8 +444,8 @@ end # end comp_mml
     # Examples
     ```julia-repl
     julia> n=[5]; α=[0.0]; β=0.0; θ=vcat([α,β]...);
-    julia> ∇logZ=CpelRrbs.get_∇logZ(n,θ);
-    julia> CpelRrbs.comp_nme(n,θ,∇logZ)
+    julia> ∇logZ=CpelTdm.get_∇logZ(n,θ);
+    julia> CpelTdm.comp_nme(n,θ,∇logZ)
     1.0
     ```
 """
@@ -464,14 +464,14 @@ end # end comp_nme
     # Examples
     ```julia-repl
     julia> n=[20]; θ1=θ2=[1.0,1.0];
-    julia> ∇logZ1s = CpelRrbs.get_∇logZ(n,θ1);
-    julia> ∇logZ2s = CpelRrbs.get_∇logZ(n,θ2);
-    julia> CpelRrbs.comp_cmd(n,θ1,θ2,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = CpelTdm.get_∇logZ(n,θ1);
+    julia> ∇logZ2s = CpelTdm.get_∇logZ(n,θ2);
+    julia> CpelTdm.comp_cmd(n,θ1,θ2,∇logZ1s,∇logZ2s)
     0.0
     julia> n=[20]; θ1=[-5.0,5.0]; θ2=[5.0,5.0];
-    julia> ∇logZ1s = CpelRrbs.get_∇logZ(n,θ1);
-    julia> ∇logZ2s = CpelRrbs.get_∇logZ(n,θ2);
-    julia> CpelRrbs.comp_cmd(n,θ1,θ2,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = CpelTdm.get_∇logZ(n,θ1);
+    julia> ∇logZ2s = CpelTdm.get_∇logZ(n,θ2);
+    julia> CpelTdm.comp_cmd(n,θ1,θ2,∇logZ1s,∇logZ2s)
     1.0
     ```
 """

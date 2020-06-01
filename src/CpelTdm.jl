@@ -20,6 +20,6 @@ include("HypothesisTesting.jl")
 include("Simulations.jl")
 
 ## Exports
-export cpeltdm
+export cpel_tdm
 
 end # module

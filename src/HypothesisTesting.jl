@@ -9,7 +9,7 @@
     # Examples
     ```julia-repl
     julia> n=[5]; θs=[[0.0,0.0],[0.0,0.0]];
-    julia> CpelRrbs.get_all_∇logZs(n,θs)
+    julia> CpelTdm.get_all_∇logZs(n,θs)
     [[0.0,0.0],[0.0,0.0]]
     ```
 """
@@ -36,9 +36,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[0.0,0.0],[0.0,0.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_stat_mml(n,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_stat_mml(n,∇logZ1s,∇logZ2s)
     -0.48867352
     ```
 """
@@ -70,9 +70,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5); perm_ids=[1,3,5,7,9]; 
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_perm_stat_mml(n,∇logZ1s,∇logZ2s,perm_ids)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_perm_stat_mml(n,∇logZ1s,∇logZ2s,perm_ids)
     0.15564650799999996
     ```
 """
@@ -95,9 +95,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[0.0,0.0],[0.0,0.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
     0.91986634
     ```
 """
@@ -130,9 +130,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5); perm_ids=[1,3,5,7,9];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_perm_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_perm_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
     0.0
     ```
 """
@@ -161,9 +161,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[-1.0,1.0],[-1.0,1.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
     0.7888652058295635
     ```
 """
@@ -190,9 +190,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5); perm_ids=[1,3,5,7,9];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
     0.1691594717040136
     ```
 """
@@ -210,7 +210,7 @@ function comp_unmat_perm_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}}
     deleteat!(∇logZ2sp,perm_ids)  
 
     # Return
-    return comp_unmat_stat_cmd(n,θ1sp,θ2sp,∇logZ1s,∇logZ2s)
+    return comp_unmat_stat_cmd(n,θ1sp,θ2sp,∇logZ1sp,∇logZ2sp)
     
 end
 """
@@ -222,13 +222,13 @@ end
     ```julia-repl
     julia> using Random; Random.seed!(1234);
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
-    julia> tmml_test,tnme_test,tcmd_test = CpelRrbs.unmat_tests(n,θ1s,θ2s)
-    ((0.7782325400000001, 0.007936507936507936), (0.0, 1.0), (0.3253066763538721, 0.003968253968253968))
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    ((0.7782325400000001, 0.007936507936507936), (0.0, 1.0), (0.3253066763538721, 0.007936507936507936))
     julia> n=[10]; θ1s=fill([0.5,0.5],8); θ2s=fill([-0.5,0.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelRrbs.unmat_tests(n,θ1s,θ2s)
-    ((0.77823254, 0.0020833333333333333), (0.0, 1.0), (0.325306676353872, 0.0010416666666666667))
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    ((0.77823254, 0.0020833333333333333), (0.0, 1.0), (0.325306676353872, 0.0020833333333333333))
     julia> n=[10]; θ1s=fill([0.0,0.0],8); θ2s=fill([0.0,2.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelRrbs.unmat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
     ((0.0, 1.0), (0.84782978, 0.0010309278350515464), (0.43786215630140907, 0.0010309278350515464))
     ```
 """
@@ -296,9 +296,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[0.0,0.0],[0.0,0.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
     2-element Array{Float64,1}:
      -0.48867352
      -0.48867352
@@ -324,9 +324,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[0.0,0.0],[0.0,0.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_mat_diff_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_mat_diff_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
     2-element Array{Float64,1}:
      0.91986634
      0.91986634
@@ -354,10 +354,10 @@ end
     # Examples
     ```julia-repl
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> mml_diffs = CpelRrbs.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
-    julia> CpelRrbs.comp_mat_j_stat(mml_diffs,0)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> mml_diffs = CpelTdm.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
+    julia> CpelTdm.comp_mat_j_stat(mml_diffs,0)
     -0.7782325400000001
     ```
 """
@@ -384,11 +384,11 @@ end
     # Examples
     ```julia-repl
     julia> n=[10]; θ1s=fill([0.5,0.5],2); θ2s=fill([-0.5,0.5],2);
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> mml_diffs = CpelRrbs.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s);
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> mml_diffs = CpelTdm.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s);
     julia> js = collect(0:2^length(θ1s)-1);
-    julia> CpelRrbs.comp_mat_perm_stats(mml_diffs,js)
+    julia> CpelTdm.comp_mat_perm_stats(mml_diffs,js)
     4-element Array{Float64,1}:
      -0.7782325400000001
      0.0               
@@ -410,9 +410,9 @@ end
     # Examples
     ```julia-repl
     julia> n=[5]; θ1s=[[-1.0,1.0],[-1.0,1.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
-    julia> ∇logZ1s = [CpelRrbs.get_∇logZ(n,θ1) for θ1 in θ1s];
-    julia> ∇logZ2s = [CpelRrbs.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelRrbs.comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
+    julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
+    julia> CpelTdm.comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
      0.7888652058295635
     ```
 """
@@ -439,11 +439,16 @@ end
     ```julia-repl
     julia> using Random; Random.seed!(1234);
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
-    julia> tmml_test,tnme_test,tcmd_test = CpelRrbs.mat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000001, 0.0625), (0.0, 1.0), (0.3253066763538722, 0.03125))
     julia> n=[10]; θ1s=fill([0.5,0.5],8); θ2s=fill([-0.5,0.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelRrbs.mat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000002, 0.00390625), (0.0, 1.0), (0.3253066763538723, 1.0))
+    julia> n=[4]; θ1s=fill([0.5,0.5],8); θ2s=fill([0.0,0.0],8);
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
+    ((0.7782325400000002, 0.00390625), (0.0, 1.0), (0.3253066763538723, 1.0))
+    julia> m = 10; n = [4]; θ1s = fill([0.5,0.5],m); θ2s = fill([0.0,0.0],m);
+    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ```
 """
 function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}};Lmax::Int64=1000)::NTuple{3,NTuple{2,Float64}}

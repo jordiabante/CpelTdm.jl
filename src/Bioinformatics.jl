@@ -487,7 +487,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> write_output(chr,outpmap,mml_paths,nme_paths,diff_paths)
+    julia> CpelTdm.write_output(chr,outpmap,mml_paths,nme_paths,diff_paths)
     ```
 """
 function write_output(chr::String,outpmap::Vector{Vector{Float64}},mml_paths::Vector{String},
@@ -526,7 +526,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> cpel_tdm(bams1,bams2,bed,fa,outdir)
+    julia> CpelTdm.cpel_tdm(bams1,bams2,bed,fa,outdir)
     ```
 """
 function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fa::String,outdir::String,prefix::String;
@@ -580,7 +580,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> anal_bed_file(bams1,bams2,bed,fa,mml_paths,nme_paths,diff_paths)
+    julia> CpelTdm.anal_bed_file(bams1,bams2,bed,fa,mml_paths,nme_paths,diff_paths)
     ```
 """
 function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,fa::String,mml_paths::String,
