@@ -48,7 +48,7 @@ end # end create_Ux
     4.0  4.0
     ```
 """
-function get_W(n::Int64, a::Float64, b::Float64)::Array{Float64,2}
+function get_W(n::Int64,a::Float64,b::Float64)::Array{Float64,2}
 
     # if n=1 then return identity
     n==1 && return [1.0 0.0;0.0 1.0]

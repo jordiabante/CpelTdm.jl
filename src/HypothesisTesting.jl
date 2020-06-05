@@ -245,7 +245,7 @@ function unmat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector
 
     # Compute number of possible randomizations
     L = binomial(length(θ1s)+length(θ2s),length(θ1s))
-    exact = L<=Lmax
+    exact = L<Lmax
 
     # Create iteratable object with all combinations
     comb_iter = combinations(1:(length(θ1s)+length(θ2s)),length(θ1s))
@@ -463,7 +463,7 @@ function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{V
     tcmd_obs = comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
 
     # Get group label combinations to use
-    exact = 2^length(θ1s)<=Lmax
+    exact = 2^length(θ1s)<Lmax
     js = exact ? collect(0:2^length(θ1s)-1) : rand(0:2^length(θ1s)-1,Lmax)
 
     # Compute permutation stats

@@ -19,7 +19,7 @@ const FLAGS_ALLOWED = [0,16,83,99,147,163]  # Flags allowed in BAM recs
     [2020-03-30 16:24:18]: Hello
     ```
 """
-function print_log(mess::String)
+function print_log(mess::String)::Nothing
 
     # Right format for date
     date = Dates.format(now(), "yyyy-mm-dd HH:MM:SS")
@@ -29,7 +29,29 @@ function print_log(mess::String)
     # Return
     return nothing
 
-end # end print_log
+end
+"""
+    `sleep_exit(MESSAGE)`
+
+    Function that prints MESSAGE, waits 5 seconds and exits without error.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.sleep_exit("Bye")
+    [2020-03-30 16:24:18]: Bye
+    ```
+"""
+function sleep_exit(mess::String)::Nothing
+
+    # Print message
+    print_log(mess)
+    sleep(5)
+    exit(0)
+
+    # Return
+    return nothing
+
+end
 """
     `get_align_strand(PAIRED_END,FLAG1,FLAG2)`
 
@@ -256,24 +278,36 @@ function read_bam(bam::String,chr::String,roi_st::Int64,roi_end::Int64,cpg_pos::
 
 end # end read_bam
 """
-    `get_paths(BAMS1,BAMS2,FA,BED,OUTDIR,OUTPREFIX)`
+    `get_paths(BAMS1,BAMS2,FASTA,BED,OUTDIR,OUTPREFIX)`
 
     Function that returns output file names.
 
     # Examples
     ```julia-repl
-    julia> CpelTdm.get_paths(bams1,bams2,fa,bed,outdir,outprefix)
+    julia> out_mml_paths,out_nme_paths,out_diff_paths = CpelTdm.get_paths(bams1,bams2,fasta,bed,outdir,outprefix)
     ```
 """
-function get_paths(bams1::Vector{String},bams2::Vector{String},fa::String,bed::String,outdir::String,
+function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed::String,outdir::String,
                    outprefix::String)::NTuple{3,Vector{String}}
 
-    # Check index files exist
-    ind_miss = !isfile(fa*".fai")
+    # Check BED file exists
+    if !isfile(bed)
+        print_log("BED file was not found ...")
+        return ([],[],[])
+    end
+
+    # Check FASTA index file exists
+    if !all([isfile(fasta),isfile(fasta*".fai")])
+        print_log("Fasta reference and/or index were not found ...")
+        return ([],[],[])
+    end
+    
+    # Check BAM index files exists
+    ind_miss = false
     for bam in vcat(bams1,bams2)
-        if !isfile(bam*".bai")
+        if !all([isfile(bam),isfile(bam*".bai")])
             ind_miss |= true
-            print_log("Index files missing for")
+            print_log("BAM and/or its index file missing for")
             print_log("$(bam)")
         end
     end
@@ -292,7 +326,7 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fa::String,bed::S
     end
 
     # Differentiial analysis bedGraph output files
-    out_diff_paths = "$(outdir)/$(outprefix)_" * ["Tmml","Tnme","Tcmd"] .* "_diff_analysis.bedGraph"
+    out_diff_paths = "$(outdir)/$(outprefix)_" .* ["tmml","tnme","tcmd"] .* "_diff_analysis.bedGraph"
     
     # Check for existance of at least an output files
     if all(isfile.(out_diff_paths))
@@ -300,11 +334,6 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fa::String,bed::S
         return ([],[],[])
     end
 
-    # Check BED file exists
-    if !(isfile(bed))
-        print_log("BED file does not exist...")
-        return ([],[],[])
-    end
 
     # Return paths
     return out_mml_paths,out_nme_paths,out_diff_paths
@@ -356,7 +385,7 @@ function split_bed_record(bed_rec::BED.Record,max_size_anal_reg::Int64)::Vector{
     @inbounds for j=1:n_anal_reg    
         
         # Get coordinates
-        chr_st = BED.chromstart(bed_rec) + (j-1) * size_anal_reg - 2
+        chr_st = BED.chromstart(bed_rec) + (j-1) * size_anal_reg - 1
         chr_end = j==n_anal_reg ? BED.chromend(bed_rec) : chr_st + size_anal_reg + 1
 
         # Create string with BED record
@@ -402,7 +431,7 @@ end
 function gen_anal_reg_file(bed::String,bed_out::String,max_size_anal_reg::Int64)::Nothing
 
     # Check if BED file already exists
-    isfile(bed_out) && (print_log("Found CpelTdm BED file ..."); return nothing)
+    isfile(bed_out) && (print_log("Found existing CpelTdm BED file ..."); return nothing)   
 
     # Read new BED file
     reader = open(BED.Reader,bed)
@@ -441,14 +470,14 @@ end
 function get_anal_reg_chr(bed::String,chr::String)::Vector{BED.Record}
 
     # Read new BED file
-    record = BED.Record()
     reader = open(BED.Reader,bed)
     anal_regs = Vector{BED.Record}()
     while !eof(reader)
         # Get record
+        # Note: when reading converts to a 1-based and start and end are inclusive
+        record = BED.Record()
         read!(reader,record)
         # Keep if in chromosome
-        BED.chrom(record)==chr && CpelTdm.print_log(BED.chrom(record))
         BED.chrom(record)==chr && push!(anal_regs,record)
     end
     close(reader)
@@ -458,80 +487,268 @@ function get_anal_reg_chr(bed::String,chr::String)::Vector{BED.Record}
     
 end
 """
-    `write_bedGraph(CHR,STATS,PATH)`
+    `get_cpg_pos!(ROI,FASTA)`
 
-    Function that writes bedGraph files.
+    Function that stores vector of CpG site positions in ROI.
 
     # Examples
     ```julia-repl
-    julia> CpelTdm.write_bedGraph(chr,stats,path)
+    julia> CpelTdm.get_cpg_pos!(roi,fasta)
     ```
 """
-function write_bedGraph(chr::String,stats::Vector{Tuple{Int64,Int64,Float64}},path::String)::Nothing
+function get_cpg_pos!(roi_data::RoiData,fasta::String)::Nothing
+
+    # Get sequence
+    fasta_reader = open(FASTA.Reader,fasta,index=fasta*".fai")
+    fa_record = fasta_reader[roi_data.chr]
+    close(fasta_reader)
+
+    # Get position CpG sites
+    roi_seq = convert(String,FASTA.sequence(fa_record,roi_data.chrst:roi_data.chrend))
+    cpg_pos = map(x->getfield(x,:offset),eachmatch(r"CG",roi_seq)) .+ roi_data.chrst .- 1
     
-    # Write
-    open(path, "a") do f
-        for i=1:length(stats)
-            write(f,"$(chr)\t"*join(string.(collect(stats[i])),"\t"),"\n")
-        end
-    end
+    # Set cpg_pos
+    roi_data.cpg_pos = cpg_pos
 
     # Return nothing
     return nothing
 
 end
 """
-    `write_output(CHR,OUTPMAP,MML_PATHS,NME_PATHS,DIFF_PATHS)`
+    `get_ns(ROI,MAX_SUBREGION_SIZE)`
+
+    Function that returns [N1,...,NK] given the position of the CpG sites & maximum subregion size.
+
+    # Examples
+    ```julia-repl
+    julia> roi_data = CpelTdm.RoiData(); 
+    julia> roi_data.chr = "chr22"; roi_data.chrst = 10; roi_data.chrend = 400;
+    julia> roi_data.cpg_pos = [100,200,300,350];
+    julia> max_size_subreg = 200;
+    julia> CpelTdm.get_ns(roi_data,max_size_subreg)
+    2-element Array{Int64,1}:
+    2
+    2
+    ```
+"""
+function get_ns!(roi_data::RoiData,max_size_subreg::Int64)::Nothing
+
+    # Check if need to partition
+    if (roi_data.chrend-roi_data.chrst)<=max_size_subreg
+        roi_data.n_vec = [length(roi_data.cpg_pos)]
+        return nothing
+    end
+
+    # Get K of model
+    k = ceil((roi_data.chrend-roi_data.chrst+1)/max_size_subreg)
+
+    # Get delimiters
+    delimiters = vcat(collect(roi_data.chrst:(roi_data.chrend-roi_data.chrst+1)/k:roi_data.chrend),roi_data.chrend)
+
+    # Partition CpG sites
+    ids = [findfirst(y->y>=x,delimiters)-1 for x in roi_data.cpg_pos]
+
+    # Set n vector
+    roi_data.n_vec = [sum(ids.==i) for i in unique(ids)]
+
+    # Return nothing
+    return nothing
+
+end
+"""
+    `get_obs_per_cpg(XOBS)`
+
+    Function that returns the number of observations per CpG site as a vector.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.get_obs_per_cpg(xobs)
+    ```
+"""
+function get_obs_per_cpg(xobs::Array{Vector{Int64},1})::Vector{Int64}
+
+    # Get observations per CpG site
+    out = length(xobs)>0 ? vcat(sum(abs.(hcat(xobs...)),dims=2)...) : [0]
+
+    # Return
+    return out
+
+end
+"""
+    `mean_cov(XOBS)`
+
+    Function returns the average coverage per CpG given some observations `XOBS`.
+
+    # Examples
+    ```julia-repl
+    julia> xobs=[[1,-1] for i=1:10]; append!(xobs,[[1,0] for i=1:10]);
+    julia> CpelTdm.mean_cov(xobs)
+    15.0
+    ```
+"""
+function mean_cov(xobs::Array{Vector{Int64},1})::Float64
+
+    # Return 0 if no observations
+    return length(xobs)>0 ? norm(hcat(xobs...),1)/length(xobs[1]) : 0.0
+
+end
+"""
+    `write_mml_out(OUT_PMAP,MML_PATHS)`
+
+    Function that writes MML in corresponding bedGraph files.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.write_mml_out(out_pmap,mml_paths)
+    ```
+"""
+function write_mml_out(out_pmap::Vector{RoiData},mml_paths::Vector{String})::Nothing
+    
+    # Open streams
+    ios = [open(path,"a") for path in mml_paths]
+    
+    # Loop over ROIs
+    @inbounds for roi in out_pmap
+        
+        # Get data from ROI
+        mmls = vcat(roi.mmls1,roi.mmls2)
+        
+        # Write
+        @inbounds for i=1:length(ios)
+            write(ios[i],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(mmls[i])\n")
+        end
+
+    end
+
+    # Close all streams
+    close.(ios)
+
+    # Return nothing
+    return nothing
+
+end
+"""
+    `write_nme_out(OUT_PMAP,NME_PATHS)`
+
+    Function that writes NME in corresponding bedGraph files.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.write_nme_out(out_pmap,nme_paths)
+    ```
+"""
+function write_nme_out(out_pmap::Vector{RoiData},nme_paths::Vector{String})::Nothing
+    
+    # Open streams
+    ios = [open(path,"a") for path in nme_paths]
+    
+    # Loop over ROIs
+    @inbounds for roi in out_pmap
+
+        # Get data from ROI
+        nmes = vcat(roi.nmes1,roi.nmes2)
+        
+        # Write
+        @inbounds for i=1:length(ios)
+            write(ios[i],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(nmes[i])\n")
+        end
+
+    end
+
+    # Close all streams
+    close.(ios)
+
+    # Return nothing
+    return nothing
+
+end
+"""
+    `write_diff_out(OUT_PMAP,DIFF_PATHS)`
+
+    Function that writes differential output in corresponding bedGraph files.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.write_diff_out(out_pmap,diff_paths)
+    ```
+"""
+function write_diff_out(out_pmap::Vector{RoiData},diff_paths::Vector{String})::Nothing
+    
+    # Open streams
+    ios = [open(path,"a") for path in diff_paths]
+    
+    # Loop over ROIs
+    @inbounds for roi in out_pmap
+        
+        # Get data from ROI
+        tmml,pmml = roi.mml_test
+        tnme,pnme = roi.nme_test
+        tcmd,pcmd = roi.cmd_test
+
+        # Write
+        write(ios[1],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tmml)\t$(pmml)\n")
+        write(ios[2],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tnme)\t$(pnme)\n")
+        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tcmd)\t$(pcmd)\n")
+
+    end
+
+    # Close all streams
+    close.(ios)
+
+    # Return nothing
+    return nothing
+
+end
+"""
+    `write_output(OUT_PMAP,OUT_PATHS)`
 
     Function that write output of pmap into respective files.
 
     # Examples
     ```julia-repl
-    julia> CpelTdm.write_output(chr,outpmap,mml_paths,nme_paths,diff_paths)
+    julia> CpelTdm.write_output(out_pmap,out_paths)
     ```
 """
-function write_output(chr::String,outpmap::Vector{Vector{Float64}},mml_paths::Vector{String},
-                      nme_paths::Vector{String},diff_paths::Vector{String})::Nothing
-    
-    # Write MMLs
-    for i=1:length(mml_paths)
-        write_bedGraph([x[i] for x in outpmap],chr,mml_paths[i])
-    end
+function write_output(out_pmap::Vector{RoiData},out_paths::NTuple{3,Vector{String}})::Nothing
+
+    # Assign paths 
+    mml_paths = out_paths[1]
+    nme_paths = out_paths[2]
+    diff_paths = out_paths[3]
+
+    # Write MML
+    write_mml_out(out_pmap,mml_paths)
 
     # Write NMEs
-    offset = length(mml_paths)
-    for i=1:length(nme_paths)
-        write_bedGraph([x[offset+i] for x in outpmap],chr,nme_paths[i])
-    end
+    write_mml_out(out_pmap,nme_paths)
 
     # Write differential analysis
-    offset += length(nme_paths)
-    write_bedGraph([x[offset+1] for x in outpmap],chr,diff_paths[1])
-    write_bedGraph([x[offset+2] for x in outpmap],chr,diff_paths[2])
-    write_bedGraph([x[offset+3] for x in outpmap],chr,diff_paths[3])
+    write_diff_out(out_pmap,diff_paths)
 
     # Return nothing
     return nothing
 
 end
 """
-    `cpel_tdm(BAMS1,BAMS2,BED,FA,OUTDIR)`
+    `cpel_tdm(BAMS1,BAMS2,BED,FASTA,OUTDIR,PREFIX)`
 
     Function to call to CpelTdm analysis. 
-        - BAMS1: BAM files associated to group 1.
-        - BAMS2: BAM files associated to group 2.
+
+        - BAMS1: BAM files associated to group 1 (require index file).
+        - BAMS2: BAM files associated to group 2 (require index file).
         - BED: BED file containing regions of interest.
-        - FA: reference genome.
+        - FASTA: reference genome (requires index file).
         - OUTDIR: output directory to store results.
+        - PREFIX: prefix of output differential files.
 
     # Examples
     ```julia-repl
-    julia> CpelTdm.cpel_tdm(bams1,bams2,bed,fa,outdir)
+    julia> CpelTdm.cpel_tdm(bams1,bams2,bed,fasta,outdir,prefix)
     ```
 """
-function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fa::String,outdir::String,prefix::String;
-                   pe::Bool=true,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,cov_ths::Int64=5,
-                   matched::Bool=false,trim::NTuple{4,Int64}=(5,0,5,0),bound_check::Bool=false)::Nothing
+function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,outdir::String,prefix::String;
+                  pe::Bool=true,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
+                  matched::Bool=false,trim::NTuple{4,Int64}=(5,0,5,0),bound_check::Bool=false)::Nothing
 
     # Print initialization of juliASM
     print_log("Starting CpelTdm ...")
@@ -540,17 +757,22 @@ function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fa::St
     print_log("Checking IO ...")
     
     # Get paths
-    mml_paths,nme_paths,diff_paths = get_paths(bams1,bams2,fa,bed,outdir,prefix)
+    out_paths = get_paths(bams1,bams2,fasta,bed,outdir,prefix)
 
     # Exist if any output file exists
-    if length.(mml_paths).==0
-        print_log("Output files already exist. Delete them to run the analysis again.")
-        exit(0)
-    end
-
+    any(isfile.(out_paths[1])) && sleep_exit("Output files already exist. Exiting ...")
+    
     # Create output folder if it doesn't exist
     isdir(outdir) || mkdir(outdir)
 
+    ## Configure run
+    print_log("Configuring CpelTdm ...")
+    matched ? print_log("Matched comparison ...") : print_log("Unmatched comparison ...")
+    config = CpeltdmConfig(pe,bound_check,min_cov,matched,trim,max_size_subreg,max_size_anal_reg)
+
+    # Check same number of samles is matched
+    matched && (length(bams1)!=length(bams2)) && sleep_exit("Unmatched samples found. Exiting ...")
+    
     ## Define analysis regions
     print_log("Defining analysis regions from BED file ...")
 
@@ -561,9 +783,8 @@ function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fa::St
     ## Inference
 
     # Estimate θ, compute MML & NME, and do test for each ROI
-    print_log("Running analysis ...")
-    anal_bed_file(bams1,bams2,bed_out,fa,mml_paths,nme_paths,diff_paths;pe=pe,max_size_anal_reg=max_size_anal_reg,
-                  max_size_subreg=max_size_subreg,cov_ths=cov_ths,matched=matched,trim=trim,bound_check=bound_check)
+    print_log("Running differential analysis ...")
+    anal_bed_file(bams1,bams2,bed_out,fasta,out_paths,config)
 
     # Print done
     print_log("Done.")
@@ -573,41 +794,39 @@ function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fa::St
 
 end
 """
-    `anal_bed_file(BAMS1,BAMS2,BED,FA,MML_PATHS,NME_PATHS,DIFF_PATHS)`
+    `anal_bed_file(BAMS1,BAMS2,BED,FASTA,OUT_PATHS,CONFIG)`
 
     Function that estimates θ for all samples, computes statistics, and does a matched/unmatched 
     permutation test at each ROI.
 
     # Examples
     ```julia-repl
-    julia> CpelTdm.anal_bed_file(bams1,bams2,bed,fa,mml_paths,nme_paths,diff_paths)
+    julia> CpelTdm.anal_bed_file(bams1,bams2,bed,fasta,out_paths,config)
     ```
 """
-function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,fa::String,mml_paths::String,
-                       nme_paths::String,diff_paths::String;pe::Bool=true,max_size_anal_reg::Int64=1000,
-                       max_size_subreg::Int64=250,cov_ths::Int64=5,matched::Bool=false,
-                       trim::NTuple{4,Int64}=(5,0,5,0),bound_check::Bool=false)::Nothing
+function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,
+                       out_paths::NTuple{3,Vector{String}},config::CpeltdmConfig)::Nothing
 
     # Find chromosomes
-    reader_fa = open(FASTA.Reader,fa,index=fa*".fai")
-    chr_sizes = reader_fa.index.lengths
-    chr_names = reader_fa.index.names
-    close(reader_fa)
+    fasta_reader = open(FASTA.Reader,fasta,index=fasta*".fai")
+    chr_sizes = fasta_reader.index.lengths
+    chr_names = fasta_reader.index.names
+    close(fasta_reader)
 
     # Loop over chromosomes
     for chr in chr_names
 
         # Get windows pertaining to current chromosome
         print_log("Processing chr: $(chr) ...")
-        reg_chr = get_anal_reg_chr(bed,chr)
+        roi_chr = get_anal_reg_chr(bed,chr)
         chr_size = chr_sizes[findfirst(x->x==chr,chr_names)]
 
-        # Process regions in chromosome
-        # out_pmap = pmap(x->pmap_dmr_finder(x,chr,chr_size,bam,gff,fa,pe,g_max,cov_ths,trim,bound_check),regions_chr)
-        # length(out_pmap)>0 || continue
+        # Process regions of interest in chromosome
+        out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
+        length(out_pmap)>0 || continue
 
         # Add last to respective bedGraph file
-        # write_output(chr,out_pmap,mml_paths,nme_paths,diff_paths)
+        write_output(out_pmap,out_paths)
 
     end
 
@@ -621,52 +840,140 @@ function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,f
     # Return nothing
     return nothing
 
-end # end dmr_finder
-# """
-#     `pmap_dmr_finder(FEAT,CHR,CHR_SIZE,BAM,GFF,FA,PE,G,COV_THS,TRIM)`
+end
+"""
+    `pmap_anal_roi(ROI,CHR,CHR_SIZE,BAMS1,BAMS2,FASTA,CONFIG)`
 
-#     Function that estimates θ and computes MML/NME for all samples, and does permutation test for a given ROI.
+    Function that estimates θ and computes MML/NME for all samples, and does permutation test for a given ROI.
 
-#     # Examples
-#     ```julia-repl
-#     julia> pmap_dmr_finder(FEAT,CHR,CHR_SIZE,BAM,GFF,FA,PE,G,COV_THS,TRIM)
-#     ```
-# """
-# function pmap_dmr_finder(feat::GFF3.Record,chr::String,chr_size::Int64,bam::String,gff::String,
-#                          fa::String,pe::Bool,g_max::Int64,cov_ths::Int64,trim::NTuple{4,Int64},
-#                          bound_check::Bool)#::Vector{Tuple{Int64,Int64,Float64,Int64,Int64}}
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.pmap_anal_roi(roi,chr,chr_size,bams1,bams2,fasta,config)
+    ```
+"""
+function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector{String},bams2::Vector{String},
+                       fasta::String,config::CpeltdmConfig)::RoiData
 
-#     # Empty output
-#     # nan_out = [(0,0,0.0,0,0),(0,0,0.0,0,0)]
+    # Print ROI for testing
+    println(roi)
 
-#     # Get window of interest
-#     # f_st = GFF3.seqstart(feat)
-#     # f_end = GFF3.seqend(feat)
+    # Get sample size
+    s1 = length(bams1)
+    s2 = length(bams2)
 
-#     # Get CpG sites
-#     # cpg_pos = get_cpg_pos(Dict(GFF3.attributes(feat)))
-#     # length(cpg_pos[1])>0 || return nan_out
+    # Empty output
+    roi_data = RoiData(s1,s2)
 
-#     # Get vector of Ns
-#     # nvec = get_ns(cpg_pos[1],g_max,f_st,f_end)
+    # Store chromosomal info
+    roi_data.chr = BED.chrom(roi)
+    roi_data.chrst = BED.chromstart(roi)
+    roi_data.chrend = BED.chromend(roi)
 
-#     # Get vectors from BAM overlapping region
-#     # xobs = read_bam(bam,chr,f_st,f_end,cpg_pos[1],chr_size,pe,trim)
-#     # obs_per_cpg = get_obs_per_cpg(xobs)
-#     # (cov_ths<=mean_cov(xobs)<=400) && (sum(obs_per_cpg.==0)<=1.0/5.0*sum(nvec)) || return nan_out
+    # Get CpG sites
+    get_cpg_pos!(roi_data,fasta)
+    length(roi_data.cpg_pos)>0 || return roi_data
 
-#     # Estimate parameters of CPEL models
-#     # θhat = est_theta_sa(nvec,xobs)
-#     # bound_check && check_boundary(θhat) && return nan_out
+    # Get vector of Ns
+    get_ns!(roi_data,config.max_size_subreg)
 
-#     # Estimate intermediate quantities
-#     # ∇1 = get_grad_logZ(nvec,θhat)
+    ## Estimate θs
 
-#     # Compute output
-#     # mml = comp_mml_∇(nvec,∇1)
-#     # nme = comp_nme_∇(nvec,θhat,∇1)
+    # Loop over group 1 samples
+    # print_log("First group ...")
+    @inbounds for i=1:s1
 
-#     # Return output
-#     return true
+        # Get BAM file
+        bam = bams1[i]
 
-# end # end pmap_allele_agnostic_chr
+        # Get vectors from BAM overlapping region
+        xobs = read_bam(bam,chr,roi_data.chrst,roi_data.chrend,roi_data.cpg_pos,chr_size,config.pe,config.trim)
+        obs_per_cpg = get_obs_per_cpg(xobs)
+        (config.min_cov<=mean_cov(xobs)<=400) && (sum(obs_per_cpg.==0)<=1.0/5.0*sum(roi_data.n_vec)) || continue
+
+        # Estimate parameters of CPEL models
+        θhat = est_theta_sa(roi_data.n_vec,xobs)
+        config.bound_check && check_boundary(θhat) && continue
+        roi_data.θ1s[i] = θhat
+
+        # Estimate intermediate quantities
+        ∇logZ = get_∇logZ(roi_data.n_vec,θhat)
+
+        # Compute output
+        roi_data.mmls1[i] = comp_mml(roi_data.n_vec,∇logZ)
+        roi_data.nmes1[i] = comp_nme(roi_data.n_vec,θhat,∇logZ)
+
+        # Set i-th sample done
+        roi_data.analyzed1[i] = true
+
+    end
+
+    # Loop over group 2 samples
+    # print_log("Second group ...")
+    @inbounds for i=1:s2
+
+        # Get BAM file
+        bam = bams2[i]
+
+        # Get vectors from BAM overlapping region
+        xobs = read_bam(bam,chr,roi_data.chrst,roi_data.chrend,roi_data.cpg_pos,chr_size,config.pe,config.trim)
+        obs_per_cpg = get_obs_per_cpg(xobs)
+        (config.min_cov<=mean_cov(xobs)<=400) && (sum(obs_per_cpg.==0)<=1.0/5.0*sum(roi_data.n_vec)) || continue
+
+        # Estimate parameters of CPEL models
+        θhat = est_theta_sa(roi_data.n_vec,xobs)
+        config.bound_check && check_boundary(θhat) && continue
+        roi_data.θ2s[i] = θhat
+
+        # Estimate intermediate quantities
+        ∇logZ = get_∇logZ(roi_data.n_vec,θhat)
+
+        # Compute output
+        roi_data.mmls2[i] = comp_mml(roi_data.n_vec,∇logZ)
+        roi_data.nmes2[i] = comp_nme(roi_data.n_vec,θhat,∇logZ)
+
+        # Set i-th sample done
+        roi_data.analyzed2[i] = true
+
+    end
+
+    ## Differential analysis
+    # print_log("Differential analysis ...")
+    if config.matched
+        
+        # Find pairs with data
+        ind = roi_data.analyzed1 .& roi_data.analyzed2
+        sum(ind) > 0 || return roi_data
+        
+        # Proceed if enough daa
+        θ1s = roi_data.θ1s[ind]
+        θ2s = roi_data.θ2s[ind]
+        
+        # Perform matched statistical analysis
+        tmml_test,tnme_test,tcmd_test = mat_tests(roi_data.n_vec,θ1s,θ2s)
+
+    else
+        
+        # See if sufficient data
+        sum(roi_data.analyzed1)>0 && sum(roi_data.analyzed2)>0 || return roi_data
+        
+        # Find pairs with data
+        θ1s = roi_data.θ1s[roi_data.analyzed1]
+        θ2s = roi_data.θ2s[roi_data.analyzed2]
+        
+        # Perform unmatched statistical analysis
+        tmml_test,tnme_test,tcmd_test = unmat_tests(roi_data.n_vec,θ1s,θ2s)    
+        
+    end
+    
+    # Set differential analysis done
+    roi_data.diff_anal_done = true
+
+    # Store results
+    roi_data.mml_test = tmml_test
+    roi_data.nme_test = tnme_test
+    roi_data.cmd_test = tcmd_test
+
+    # Return
+    return roi_data
+
+end

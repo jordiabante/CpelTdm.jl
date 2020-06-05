@@ -473,9 +473,9 @@ uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.5"
 
 [[Twiddle]]
-git-tree-sha1 = "475f0c0e1633b51e81cf92099356fcb4029a9e19"
+git-tree-sha1 = "29509c4862bfb5da9e76eb6937125ab93986270a"
 uuid = "7200193e-83a8-5a55-b20d-5d36d44a0795"
-version = "1.1.1"
+version = "1.1.2"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]
