@@ -45,7 +45,7 @@ function sleep_exit(mess::String)::Nothing
 
     # Print message
     print_log(mess)
-    sleep(5)
+    sleep(10)
     exit(0)
 
     # Return
@@ -292,14 +292,12 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed
 
     # Check BED file exists
     if !isfile(bed)
-        print_log("BED file was not found ...")
-        return ([],[],[])
+        sleep_exit("BED file was not found ...")
     end
 
     # Check FASTA index file exists
     if !all([isfile(fasta),isfile(fasta*".fai")])
-        print_log("Fasta reference and/or index were not found ...")
-        return ([],[],[])
+        sleep_exit("Fasta reference and/or index were not found ...")
     end
     
     # Check BAM index files exists
@@ -311,7 +309,7 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed
             print_log("$(bam)")
         end
     end
-    ind_miss && return ([],[],[])
+    ind_miss && sleep_exit("Index files missing ...")
 
     # Individual bedGraph output files
     prefixes = [String(split(basename(bam),".")[1]) for bam in bams1]
@@ -320,20 +318,17 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed
     out_nme_paths = ["$(outdir)/$(prefix)_nme.bedGraph" for prefix in prefixes]
     
     # Check for existance of at least an output files
-    if all(isfile.(vcat(out_mml_paths,out_nme_paths)))
-        print_log("At least an MML or NME file already exists...")
-        return ([],[],[])
+    if any(isfile.(vcat(out_mml_paths,out_nme_paths)))
+        sleep_exit("At least an MML or NME file already exists...")
     end
 
     # Differentiial analysis bedGraph output files
     out_diff_paths = "$(outdir)/$(outprefix)_" .* ["tmml","tnme","tcmd"] .* "_diff_analysis.bedGraph"
     
     # Check for existance of at least an output files
-    if all(isfile.(out_diff_paths))
-        print_log("At least a differential output file already exists...")
-        return ([],[],[])
+    if any(isfile.(out_diff_paths))
+        sleep_exit("At least a differential output file already exists...")
     end
-
 
     # Return paths
     return out_mml_paths,out_nme_paths,out_diff_paths
@@ -676,7 +671,7 @@ function write_diff_out(out_pmap::Vector{RoiData},diff_paths::Vector{String})::N
     
     # Open streams
     ios = [open(path,"a") for path in diff_paths]
-    
+
     # Loop over ROIs
     @inbounds for roi in out_pmap
         
@@ -759,16 +754,13 @@ function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta:
     # Get paths
     out_paths = get_paths(bams1,bams2,fasta,bed,outdir,prefix)
 
-    # Exist if any output file exists
-    any(isfile.(out_paths[1])) && sleep_exit("Output files already exist. Exiting ...")
-    
     # Create output folder if it doesn't exist
     isdir(outdir) || mkdir(outdir)
 
     ## Configure run
     print_log("Configuring CpelTdm ...")
     matched ? print_log("Matched comparison ...") : print_log("Unmatched comparison ...")
-    config = CpeltdmConfig(pe,bound_check,min_cov,matched,trim,max_size_subreg,max_size_anal_reg)
+    config = CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)
 
     # Check same number of samles is matched
     matched && (length(bams1)!=length(bams2)) && sleep_exit("Unmatched samples found. Exiting ...")
@@ -823,7 +815,6 @@ function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,f
 
         # Process regions of interest in chromosome
         out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
-        length(out_pmap)>0 || continue
 
         # Add last to respective bedGraph file
         write_output(out_pmap,out_paths)

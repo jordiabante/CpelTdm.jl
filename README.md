@@ -19,9 +19,9 @@ CpelTdm is tested against Julia `1.3.0` on the latest versions of Linux, macOS a
 
 ### Installing
 
-`CpelTdm` and dependencies can be installed via the following command:
+`CpelTdm` and dependencies can be installed via the following command in julia's REPL:
 ```julia
-julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/jordiabante/CpelTdm.jl.git"))'
+(v1.3) pkg> add https://github.com/jordiabante/CpelTdm.jl.git
 ```
 
 ## Running the tests

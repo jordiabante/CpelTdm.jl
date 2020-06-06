@@ -23,8 +23,8 @@ mutable struct CpeltdmConfig
     max_size_subreg::Int64
     max_size_anal_reg::Int64
     # Initializing method
-    CpeltdmConfig(pe,bound_check,min_cov,matched,trim,max_size_subreg,max_size_anal_reg) = 
-        new(pe,min_cov,bound_check,matched,trim,max_size_subreg,max_size_anal_reg)
+    CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg) = 
+        new(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)
 end
 
 # ROI data
