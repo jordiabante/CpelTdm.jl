@@ -13,6 +13,8 @@ using Distributions             # For simulations
 using Optim                     # For estimating parameters
 using Random                    # For simulations
 using LinearAlgebra             # For matrix operations
+using DelimitedFiles            # For reading and writing delimited files
+using MultipleTesting           # For BH correction
 
 ## Includes
 include("Structures.jl")
