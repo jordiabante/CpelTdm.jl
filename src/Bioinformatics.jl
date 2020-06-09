@@ -872,12 +872,16 @@ function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,f
     # Loop over chromosomes
     for chr in chr_names
 
-        # Get windows pertaining to current chromosome
+        # Print info
         print_log("Processing chr: $(chr) ...")
+
+        # Get windows pertaining to current chromosome
+        print_log("Obtaining corresponding ROIs ...")
         roi_chr = get_anal_reg_chr(bed,chr)
         chr_size = chr_sizes[findfirst(x->x==chr,chr_names)]
 
         # Process regions of interest in chromosome
+        print_log("Performing differential analysis on ROIs ...")
         out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
 
         # Add last to respective bedGraph file
@@ -886,6 +890,7 @@ function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,f
     end
 
     # Correct for multiple hypothesis in differential analysis
+    print_log("Performing multiple hypothesis correction ...")
     mult_hyp_corr(out_paths[3])
 
     # Return nothing
@@ -906,7 +911,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
                        fasta::String,config::CpeltdmConfig)::RoiData
 
     # Print ROI for testing
-    println(roi)
+    # println(roi)
 
     # Get sample size
     s1 = length(bams1)
@@ -993,25 +998,27 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
         
         # Find pairs with data
         ind = roi_data.analyzed1 .& roi_data.analyzed2
-        sum(ind) > 0 || return roi_data
+        1/2^(sum(ind)-1)<0.05 || return roi_data
         
-        # Proceed if enough daa
+        # Get sample pairs with data
         θ1s = roi_data.θ1s[ind]
         θ2s = roi_data.θ2s[ind]
         
-        # Perform matched statistical analysis
+        # Perform matched differential analysis
         tmml_test,tnme_test,tcmd_test = mat_tests(roi_data.n_vec,θ1s,θ2s)
 
     else
         
-        # See if sufficient data
-        sum(roi_data.analyzed1)>0 && sum(roi_data.analyzed2)>0 || return roi_data
+        # Check if sufficient data
+        s1 = sum(roi_data.analyzed1)
+        s2 = sum(roi_data.analyzed2)
+        1/binomial(s1+s2,s1)<0.05 || return roi_data
         
-        # Find pairs with data
+        # Get samples with data
         θ1s = roi_data.θ1s[roi_data.analyzed1]
         θ2s = roi_data.θ2s[roi_data.analyzed2]
         
-        # Perform unmatched statistical analysis
+        # Perform unmatched differential analysis
         tmml_test,tnme_test,tcmd_test = unmat_tests(roi_data.n_vec,θ1s,θ2s)    
         
     end
