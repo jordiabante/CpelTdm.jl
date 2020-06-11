@@ -485,10 +485,10 @@ function comp_cmd(n::Vector{Int64},θ1::Vector{Float64},θ2::Vector{Float64},∇
     logZ2 = log(comp_Z(n,θ2[1:(end-1)],θ2[end]))
     logZγ = log(comp_Z(n,θγ[1:(end-1)],θγ[end]))
 
-    # Compute numerator of 1-GJSD
+    # Compute numerator of 1-CMD
     cmd = logZ1 + logZ2 - (θ1'*∇logZ1 + θ2'*∇logZ2)
 
-    # Normalize 1-GJSD
+    # Normalize 1-CMD
     cmd /= 2*logZγ - θγ'* (∇logZ1 + ∇logZ2)
     
     # Return GJSD

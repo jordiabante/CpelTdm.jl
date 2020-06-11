@@ -715,7 +715,7 @@ function write_output(out_pmap::Vector{RoiData},out_paths::NTuple{3,Vector{Strin
     write_mml_out(out_pmap,mml_paths)
 
     # Write NMEs
-    write_mml_out(out_pmap,nme_paths)
+    write_nme_out(out_pmap,nme_paths)
 
     # Write differential analysis
     write_diff_out(out_pmap,diff_paths)
@@ -804,8 +804,8 @@ end
     ```
 """
 function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,outdir::String,prefix::String;
-                  pe::Bool=true,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
-                  matched::Bool=false,trim::NTuple{4,Int64}=(5,0,5,0),bound_check::Bool=false)::Nothing
+                  pe::Bool=false,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
+                  matched::Bool=false,trim::NTuple{4,Int64}=(0,0,0,0),bound_check::Bool=false)::Nothing
 
     # Print initialization of juliASM
     print_log("Starting CpelTdm ...")
