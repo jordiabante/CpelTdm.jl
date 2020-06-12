@@ -51,5 +51,5 @@ mutable struct RoiData
     cmd_test::NTuple{2,Float64}
     # Initializing method
     RoiData(s1,s2) = new("",0,0,[],[],false,fill(false,s1),fill(false,s2),fill(NaN,s1),fill(NaN,s2),
-        fill(NaN,s2),fill(NaN,s2),fill([],s1),fill([],s2),(NaN,NaN),(NaN,NaN),(NaN,NaN))    
+        fill(NaN,s1),fill(NaN,s2),fill([],s1),fill([],s2),(NaN,NaN),(NaN,NaN),(NaN,NaN))    
 end

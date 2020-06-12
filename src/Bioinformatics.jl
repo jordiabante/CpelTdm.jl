@@ -743,7 +743,7 @@ function add_qvalues_to_path(path::String)::Nothing
     all_data = readdlm(path,'\t',Any)
     qvals = fill(NaN,size(all_data)[1])
     
-    # Multiple hypothesis testing correction. NOTE: should we apply BH on each N independently?
+    # Multiple hypothesis testing correction
     ind = .!isnan.(all_data[:,5])
     if sum(ind)>0 
         qvals[ind] = MultipleTesting.adjust(convert(Vector{Float64},all_data[ind,5]),BenjaminiHochberg())
