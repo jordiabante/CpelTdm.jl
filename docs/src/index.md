@@ -45,9 +45,10 @@ If the package has been properly installed, then all tests will be successful.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md)
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/jordiabante/CpelTdm.jl/blob/master/LICENSE.md)
 file for details.
 
 ## References
+
 [1] Abante, J., Goutsias, J., CpelTdm.jl: a Julia package for targeted differential 
 DNA methylation analysis, *Bioinformatics* 2020 XYZ.

@@ -2,9 +2,9 @@
 ![Docs](https://github.com/jordiabante/CpelTdm.jl/workflows/Docs/badge.svg)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/jordiabante/CpelTdm.jl/blob/master/LICENSE.md)
 
-## Main commands
+# Main commands
 
-# Unmatched group comparison
+## Unmatched group comparison
 
 In order to perform an unmatched group comparison, we first need
 to load the package. Then, the right paths need to be specified,
@@ -49,7 +49,7 @@ this file using the command `julia -p 10 cpeltdm_unmatched_call.jl`,
 which will execute the code providing CpelTdm with 10 CPUs to 
 perform the analysis.
 
-# Matched group comparison
+## Matched group comparison
 
 In order to perform an matched group comparison we need to follow
 the same steps as in the unmatched group comparison as far as 
