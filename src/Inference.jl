@@ -384,7 +384,7 @@ end # end est_alpha
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[4];
-    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:100];
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0,0.0]) for _ in 1:100];
     julia> CpelTdm.est_theta_sa(n,xobs)
     2-element Array{Float64,1}:
      -0.08515675262874925 
@@ -416,9 +416,7 @@ end # end est_theta_sa
 """
     `comp_mml([N1,...,NK],∇logZ)`
 
-    Function that computes mean methylation level (MML) over the entire haplotype. This function takes
-    advantage of the fact that E[S(X)]=Adot(θ), and it's much faster than `comp_mml`. This function is
-    only used when all CpG sites are homozygous.
+    Function that computes mean methylation level (MML) over the entire region of interest.
 
     # Examples
     ```julia-repl
@@ -437,9 +435,7 @@ end # end comp_mml
 """
     `comp_nme([N1,...,NK],θ,∇logZ)`
 
-    Function that computes normalized methylation entropy (NME) using the ∇logZ information. This
-    function can only be used in `comp_tnull` since it does not allow computation on a subset of CpG
-    sites. This function is only used when all CpG sites are homozygous.
+    Function that computes normalized methylation entropy (NME) using the ∇logZ information.
 
     # Examples
     ```julia-repl
