@@ -10,7 +10,9 @@
     ```julia-repl
     julia> n=[5]; θs=[[0.0,0.0],[0.0,0.0]];
     julia> CpelTdm.get_all_∇logZs(n,θs)
-    [[0.0,0.0],[0.0,0.0]]
+    2-element Array{Array{Float64,1},1}:
+     [0.0, 0.0]
+     [0.0, 0.0]
     ```
 """
 function get_all_∇logZs(n::Vector{Int64},θs::Vector{Vector{Float64}})::Vector{Vector{Float64}}
@@ -356,7 +358,7 @@ end
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
     julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
     julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> mml_diffs = CpelTdm.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
+    julia> mml_diffs = CpelTdm.comp_mat_diff_mml(n,∇logZ1s,∇logZ2s);
     julia> CpelTdm.comp_mat_j_stat(mml_diffs,0)
     -0.7782325400000001
     ```
@@ -413,7 +415,7 @@ end
     julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
     julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
     julia> CpelTdm.comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
-     0.7888652058295635
+    0.7888652058295635
     ```
 """
 function comp_mat_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
@@ -447,8 +449,6 @@ end
     julia> n=[4]; θ1s=fill([0.5,0.5],8); θ2s=fill([0.0,0.0],8);
     julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000002, 0.00390625), (0.0, 1.0), (0.3253066763538723, 1.0))
-    julia> m = 10; n = [4]; θ1s = fill([0.5,0.5],m); θ2s = fill([0.0,0.0],m);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ```
 """
 function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}};Lmax::Int64=1000)::NTuple{3,NTuple{2,Float64}}

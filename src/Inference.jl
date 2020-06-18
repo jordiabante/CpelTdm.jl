@@ -286,7 +286,7 @@ end
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[4];
-    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0,0.0]) for _ in 1:20];
     julia> LogLike=CpelTdm.create_Llkhd(n,xobs);
     julia> LogLike([0.0,0.0,0.0])
     55.45177444479562
@@ -356,7 +356,7 @@ end # end create_Llkhd
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234); n=[1];
-    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0],0.0) for _ in 1:20];
+    julia> xobs=[CpelTdm.gen_x_mc(n,[0.0,0.0]) for _ in 1:20];
     julia> CpelTdm.est_alpha(xobs)
     2-element Array{Float64,1}:
      0.10033534773107566

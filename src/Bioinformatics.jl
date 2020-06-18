@@ -510,17 +510,18 @@ function get_cpg_pos!(roi_data::RoiData,fasta::String)::Nothing
 
 end
 """
-    `get_ns(ROI,MAX_SUBREGION_SIZE)`
+    `get_ns!(ROI,MAX_SUBREGION_SIZE)`
 
-    Function that returns [N1,...,NK] given the position of the CpG sites & maximum subregion size.
+    Function that stores vector [N1,...,NK] given the position of the CpG sites & maximum subregion size.
 
     # Examples
     ```julia-repl
-    julia> roi_data = CpelTdm.RoiData(); 
+    julia> roi_data = CpelTdm.RoiData(10,10);
     julia> roi_data.chr = "chr22"; roi_data.chrst = 10; roi_data.chrend = 400;
     julia> roi_data.cpg_pos = [100,200,300,350];
     julia> max_size_subreg = 200;
-    julia> CpelTdm.get_ns(roi_data,max_size_subreg)
+    julia> CpelTdm.get_ns!(roi_data,max_size_subreg)
+    julia> roi_data.n_vec
     2-element Array{Int64,1}:
     2
     2

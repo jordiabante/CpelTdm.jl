@@ -4,24 +4,24 @@
 
 # Alignment
 struct AlignTemp
-    strand::String      # Methylation call strand
-    R1::BAM.Record      # First record from left to right
-    R2::BAM.Record      # Second record from left to right
+    strand::String                  # Methylation call strand
+    R1::BAM.Record                  # First record from left to right
+    R2::BAM.Record                  # Second record from left to right
 end
 mutable struct AllAlignTemps
-    paired::Bool
-    templates::Array{AlignTemp,1}
+    paired::Bool                    # Boolean indicating if record has pair
+    templates::Array{AlignTemp,1}   # All alignment templates mapping to a region
 end
 
 # CpelTdm Configuration
 mutable struct CpeltdmConfig
-    pe::Bool
-    min_cov::Int64
-    matched::Bool
-    bound_check::Bool
-    trim::NTuple{4,Int64}
-    max_size_subreg::Int64
-    max_size_anal_reg::Int64
+    pe::Bool                        # Paired/Single end
+    min_cov::Int64                  # Minimum coverage accepted
+    matched::Bool                   # Matched vs unmatched group comparison
+    bound_check::Bool               # Parameter space boundary check
+    trim::NTuple{4,Int64}           # Trimming of reads
+    max_size_subreg::Int64          # Maximum size subregion (determines K)
+    max_size_anal_reg::Int64        # Maximum size of analysis region
     # Initializing method
     CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg) = 
         new(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)

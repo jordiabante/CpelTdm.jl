@@ -7,13 +7,13 @@
     # Examples
     ```julia-repl
     julia> using Random; Random.seed!(1234);
-    julia> CpelTdm.gen_x_mc([5,5],[-0.5,0.5,0.25])
+    julia> CpelTdm.gen_x_mc([5],[0.0,0.0])
     5-element Array{Int64,1}:
-    1
-    1
-    1
-    -1
-    1
+     1
+     1
+     1
+     -1
+     1
     ```
 """
 function gen_x_mc(n::Vector{Int64},θ::Vector{Float64})::Vector{Int64}
@@ -63,7 +63,7 @@ end # end gen_x_mc
 
     # Examples
     ```julia-repl
-    julia> m = 5; n = [5]; θ1 = [0.5,0.5,0.25]; θ2 = [0.5,0.5,0.25];
+    julia> m=5; n=[5]; θ1=[0.5,0.5,0.25]; θ2=[0.5,0.5,0.25];
     julia> tmml,tnme,tcmd = CpelTdm.unmatched_sim(m,n,θ1,θ2)
     ```
 """
@@ -124,7 +124,7 @@ end
 
     # Examples
     ```julia-repl
-    julia> m = 5; n = [5]; θ1 = [0.5,0.5,0.25]; θ2 = [0.5,0.5,0.25];
+    julia> m=5; n=[5]; θ1=[0.5,0.5,0.25]; θ2=[0.5,0.5,0.25];
     julia> tmml,tnme,tcmd = CpelTdm.matched_sim(m,n,θ1,θ2)
     ```
 """
