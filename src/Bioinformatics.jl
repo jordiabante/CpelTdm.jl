@@ -880,13 +880,14 @@ function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,f
         print_log("Obtaining corresponding ROIs ...")
         roi_chr = get_anal_reg_chr(bed,chr)
         chr_size = chr_sizes[findfirst(x->x==chr,chr_names)]
+        length(roi_chr)>0 || continue
 
         # Process regions of interest in chromosome
         print_log("Performing differential analysis on ROIs ...")
         out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
 
         # Add last to respective bedGraph file
-        write_output(out_pmap,out_paths)
+        length(out_pmap)>0 && write_output(out_pmap,out_paths)
 
     end
 
@@ -997,9 +998,9 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
     # print_log("Differential analysis ...")
     if config.matched
         
-        # Find pairs with data
+        # Find pairs with data. TODO: issue with -1 power
         ind = roi_data.analyzed1 .& roi_data.analyzed2
-        1/2^(sum(ind)-1)<0.05 || return roi_data
+        (0.5^(sum(ind)-1))<0.05 || return roi_data
         
         # Get sample pairs with data
         θ1s = roi_data.θ1s[ind]

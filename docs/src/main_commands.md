@@ -31,7 +31,7 @@ dirname = "/path/to/data/"
 fa = "$(dirname)/fasta/reference.fa"
 bed = "$(dirname)/bed/regions_of_interest.bed"
 bams1 = "$(dirname)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam"]
-bams2 = "$(dirname)/bam/".*["g2_s2.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
+bams2 = "$(dirname)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
 
 # Output paths
 prefix = "cpeltdm"
@@ -71,7 +71,7 @@ dirname = "/path/to/data/"
 fa = "$(dirname)/fasta/reference.fa"
 bed = "$(dirname)/bed/regions_of_interest.bed"
 bams1 = "$(dirname)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam","g1_s5.bam"]
-bams2 = "$(dirname)/bam/".*["g2_s2.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
+bams2 = "$(dirname)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
 
 # Output paths
 prefix = "cpeltdm"
