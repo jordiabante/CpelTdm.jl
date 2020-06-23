@@ -788,118 +788,6 @@ function mult_hyp_corr(diff_paths::Vector{String})
 
 end
 """
-    `cpel_tdm(BAMS1,BAMS2,BED,FASTA,OUTDIR,PREFIX)`
-
-    Function to call to CpelTdm analysis. 
-
-        - BAMS1: BAM files associated to group 1 (require index file).
-        - BAMS2: BAM files associated to group 2 (require index file).
-        - BED: BED file containing regions of interest.
-        - FASTA: reference genome (requires index file).
-        - OUTDIR: output directory to store results.
-        - PREFIX: prefix of output differential files.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.cpel_tdm(bams1,bams2,bed,fasta,outdir,prefix)
-    ```
-"""
-function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,outdir::String,prefix::String;
-                  pe::Bool=false,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
-                  matched::Bool=false,trim::NTuple{4,Int64}=(0,0,0,0),bound_check::Bool=false)::Nothing
-
-    # Print initialization of juliASM
-    print_log("Starting CpelTdm ...")
-
-    ## IO
-    print_log("Checking IO ...")
-    
-    # Get paths
-    out_paths = get_paths(bams1,bams2,fasta,bed,outdir,prefix)
-
-    # Create output folder if it doesn't exist
-    isdir(outdir) || mkdir(outdir)
-
-    ## Configure run
-    print_log("Configuring CpelTdm ...")
-    matched ? print_log("Matched comparison ...") : print_log("Unmatched comparison ...")
-    config = CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)
-
-    # Check same number of samles is matched
-    matched && (length(bams1)!=length(bams2)) && sleep_exit("Unmatched samples found. Exiting ...")
-    
-    ## Define analysis regions
-    print_log("Defining analysis regions from BED file ...")
-
-    # Divide BED file divided into analysis regions
-    bed_out = get_bed_out_filename(bed)
-    gen_anal_reg_file(bed,bed_out,max_size_anal_reg)
-
-    ## Inference
-
-    # Estimate θ, compute MML & NME, and do test for each ROI
-    print_log("Running differential analysis ...")
-    anal_bed_file(bams1,bams2,bed_out,fasta,out_paths,config)
-    
-    ## Done
-
-    # Print done
-    print_log("Done.")
-
-    # Return
-    return nothing
-
-end
-"""
-    `anal_bed_file(BAMS1,BAMS2,BED,FASTA,OUT_PATHS,CONFIG)`
-
-    Function that estimates θ for all samples, computes statistics, and does a matched/unmatched 
-    permutation test at each ROI.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.anal_bed_file(bams1,bams2,bed,fasta,out_paths,config)
-    ```
-"""
-function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,
-                       out_paths::NTuple{3,Vector{String}},config::CpeltdmConfig)::Nothing
-
-    # Find chromosomes
-    fasta_reader = open(FASTA.Reader,fasta,index=fasta*".fai")
-    chr_sizes = fasta_reader.index.lengths
-    chr_names = fasta_reader.index.names
-    close(fasta_reader)
-
-    # Loop over chromosomes
-    for chr in chr_names
-
-        # Print info
-        print_log("Processing chr: $(chr) ...")
-
-        # Get windows pertaining to current chromosome
-        print_log("Obtaining corresponding ROIs ...")
-        roi_chr = get_anal_reg_chr(bed,chr)
-        chr_size = chr_sizes[findfirst(x->x==chr,chr_names)]
-        length(roi_chr)>0 || continue
-
-        # Process regions of interest in chromosome
-        print_log("Performing differential analysis on ROIs ...")
-        out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
-
-        # Add last to respective bedGraph file
-        length(out_pmap)>0 && write_output(out_pmap,out_paths)
-
-    end
-
-    # Correct for multiple hypothesis in differential analysis
-    print_log("Performing multiple hypothesis correction ...")
-    mult_hyp_corr(out_paths[3])
-
-    # Return nothing
-    return nothing
-
-end
-"""
     `pmap_anal_roi(ROI,CHR,CHR_SIZE,BAMS1,BAMS2,FASTA,CONFIG)`
 
     Function that estimates θ and computes MML/NME for all samples, and does permutation test for a given ROI.
@@ -1035,5 +923,117 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
 
     # Return
     return roi_data
+
+end
+"""
+    `anal_bed_file(BAMS1,BAMS2,BED,FASTA,OUT_PATHS,CONFIG)`
+
+    Function that estimates θ for all samples, computes statistics, and does a matched/unmatched 
+    permutation test at each ROI.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.anal_bed_file(bams1,bams2,bed,fasta,out_paths,config)
+    ```
+"""
+function anal_bed_file(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,
+                       out_paths::NTuple{3,Vector{String}},config::CpeltdmConfig)::Nothing
+
+    # Find chromosomes
+    fasta_reader = open(FASTA.Reader,fasta,index=fasta*".fai")
+    chr_sizes = fasta_reader.index.lengths
+    chr_names = fasta_reader.index.names
+    close(fasta_reader)
+
+    # Loop over chromosomes
+    for chr in chr_names
+
+        # Print info
+        print_log("Processing chr: $(chr) ...")
+
+        # Get windows pertaining to current chromosome
+        print_log("Obtaining corresponding ROIs ...")
+        roi_chr = get_anal_reg_chr(bed,chr)
+        chr_size = chr_sizes[findfirst(x->x==chr,chr_names)]
+        length(roi_chr)>0 || continue
+
+        # Process regions of interest in chromosome
+        print_log("Performing differential analysis on ROIs ...")
+        out_pmap = pmap(x->pmap_anal_roi(x,chr,chr_size,bams1,bams2,fasta,config),roi_chr)
+
+        # Add last to respective bedGraph file
+        length(out_pmap)>0 && write_output(out_pmap,out_paths)
+
+    end
+
+    # Correct for multiple hypothesis in differential analysis
+    print_log("Performing multiple hypothesis correction ...")
+    mult_hyp_corr(out_paths[3])
+
+    # Return nothing
+    return nothing
+
+end
+"""
+    `cpel_tdm(BAMS1,BAMS2,BED,FASTA,OUTDIR,PREFIX)`
+
+    Function to call to CpelTdm analysis. 
+
+        - BAMS1: BAM files associated to group 1 (require index file).
+        - BAMS2: BAM files associated to group 2 (require index file).
+        - BED: BED file containing regions of interest.
+        - FASTA: reference genome (requires index file).
+        - OUTDIR: output directory to store results.
+        - PREFIX: prefix of output differential files.
+
+    # Examples
+    ```julia-repl
+    julia> CpelTdm.cpel_tdm(bams1,bams2,bed,fasta,outdir,prefix)
+    ```
+"""
+function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,outdir::String,prefix::String;
+                  pe::Bool=false,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
+                  matched::Bool=false,trim::NTuple{4,Int64}=(0,0,0,0),bound_check::Bool=false)::Nothing
+
+    # Print initialization of juliASM
+    print_log("Starting CpelTdm ...")
+
+    ## IO
+    print_log("Checking IO ...")
+    
+    # Get paths
+    out_paths = get_paths(bams1,bams2,fasta,bed,outdir,prefix)
+
+    # Create output folder if it doesn't exist
+    isdir(outdir) || mkdir(outdir)
+
+    ## Configure run
+    print_log("Configuring CpelTdm ...")
+    matched ? print_log("Matched comparison ...") : print_log("Unmatched comparison ...")
+    config = CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)
+
+    # Check same number of samles is matched
+    matched && (length(bams1)!=length(bams2)) && sleep_exit("Unmatched samples found. Exiting ...")
+    
+    ## Define analysis regions
+    print_log("Defining analysis regions from BED file ...")
+
+    # Divide BED file divided into analysis regions
+    bed_out = get_bed_out_filename(bed)
+    gen_anal_reg_file(bed,bed_out,max_size_anal_reg)
+
+    ## Inference
+
+    # Estimate θ, compute MML & NME, and do test for each ROI
+    print_log("Running differential analysis ...")
+    anal_bed_file(bams1,bams2,bed_out,fasta,out_paths,config)
+    
+    ## Done
+
+    # Print done
+    print_log("Done.")
+
+    # Return
+    return nothing
 
 end

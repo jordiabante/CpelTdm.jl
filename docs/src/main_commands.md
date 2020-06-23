@@ -11,14 +11,15 @@ to load the package. Then, the right paths need to be specified,
 including paths to the reference FASTA file, given by `fa` below,
 the path to the BED file containing the regions of interest, given
 by `bed` below, and the path to each bam file for each groups, given
-by the `bams1` & `bams2` vectors below. In addition, the output 
-directory `outdir` and `prefix` need to be defined as well.
-Finally, we call function `cpel_tdm` setting the optional argument
-`matched` equal to `false`, since in this case we wish to perform
-an unmatched group comparison. In addition, here we assume that
-we are using paired end sequencing data, hence we set `pe=true`.
-However, if the sequencing data were single end, we would set
-`pe=false` instead.
+by the `bams1` & `bams2` vectors below. Note that the BED file is
+expected to have for columns, being the first three `chr`, `st`, 
+and `end`. In addition, the output directory `outdir` and `prefix` 
+need to be defined as well. Finally, we call function `cpel_tdm` 
+setting the optional argument `matched` equal to `false`, since in 
+this case we wish to perform an unmatched group comparison. In 
+addition, here we assume that we are using paired end sequencing 
+data, hence we set `pe=true`. However, if the sequencing data were 
+single end, we would set `pe=false` instead.
 
 ```julia
 

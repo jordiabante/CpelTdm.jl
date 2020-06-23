@@ -38,7 +38,6 @@ run the following command in a `julia` session:
 ```
 If the package has been properly installed, then all tests will be successful.
 
-
 ## Authors
 
 * **Jordi Abante**

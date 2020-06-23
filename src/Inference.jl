@@ -347,7 +347,7 @@ function create_Llkhd(n::Vector{Int64},xobs::Array{Vector{Int64},1})
     # Return function
     return Llkhd_fun
 
-end # end create_Llkhd
+end
 """
     `est_alpha(XOBS)`
 
@@ -375,7 +375,7 @@ function est_alpha(xobs::Array{Vector{Int64},1})::Vector{Float64}
     # Return estimate
     return [min(max(-ETA_MAX_ABS,a),ETA_MAX_ABS),0.0]
 
-end # end est_alpha
+end
 """
     `est_theta_sa([N1,...,NK],XOBS)`
 
@@ -401,7 +401,7 @@ function est_theta_sa(n::Vector{Int64},xobs::Array{Vector{Int64},1})::Vector{Flo
     init = zeros(Float64,length(n)+1)
     lower = -ETA_MAX_ABS * ones(Float64,length(n)+1)
     upper = ETA_MAX_ABS * ones(Float64,length(n)+1)
-    opts = Optim.Options(iterations=10^6,show_trace=false,store_trace=false)
+    opts = Optim.Options(iterations=10^4,show_trace=false,store_trace=false)
 
     # Boxed Simulated Annealing (SAMI)
     optim = Optim.optimize(L,lower,upper,init,SAMIN(rt=1e-4;f_tol=1e-3,verbosity=0),opts)
@@ -409,7 +409,7 @@ function est_theta_sa(n::Vector{Int64},xobs::Array{Vector{Int64},1})::Vector{Flo
     # Return estimate
     return optim.minimizer
 
-end # end est_theta_sa
+end
 ###################################################################################################
 # OUTPUT QUANTITIES
 ###################################################################################################
@@ -431,7 +431,7 @@ function comp_mml(n::Vector{Int64},∇logZ::Vector{Float64})::Float64
     # Return
     return abs(round(0.5*(1.0+1.0/sum(n)*sum(∇logZ[1:length(n)]));digits=8))
 
-end # end comp_mml
+end
 """
     `comp_nme([N1,...,NK],θ,∇logZ)`
 
@@ -450,7 +450,7 @@ function comp_nme(n::Vector{Int64},θ::Vector{Float64},∇logZ::Vector{Float64})
     # Return
     return abs(round(1.0/(sum(n)*LOG2)*(log(comp_Z(n,θ[1:(end-1)],θ[end]))-θ'*∇logZ);digits=8))
 
-end # end comp_nme
+end
 """
     `comp_cmd([N1,...,NK],θ1,θ2,∇logZ1s,∇logZ2s)`
 
