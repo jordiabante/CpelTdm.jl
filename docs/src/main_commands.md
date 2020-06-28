@@ -28,15 +28,15 @@ using Distributed
 @everywhere using CpelTdm
 
 # Set paths
-dirname = "/path/to/data/"
-fa = "$(dirname)/fasta/reference.fa"
-bed = "$(dirname)/bed/regions_of_interest.bed"
-bams1 = "$(dirname)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam"]
-bams2 = "$(dirname)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
+dir_name = "/path/to/data/"
+fa = "$(dir_name)/fasta/reference.fa"
+bed = "$(dir_name)/bed/regions_of_interest.bed"
+bams1 = "$(dir_name)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam"]
+bams2 = "$(dir_name)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
 
 # Output paths
 prefix = "cpeltdm"
-outdir = "$(dirname)/cpeltdm-unmatched/"
+outdir = "$(dir_name)/cpeltdm-unmatched/"
 
 # Run matched analysis
 cpel_tdm(bams1,bams2,bed,fa,outdir,prefix;pe=true,matched=false)
@@ -68,15 +68,15 @@ using Distributed
 @everywhere using CpelTdm
 
 # Set paths
-dirname = "/path/to/data/"
-fa = "$(dirname)/fasta/reference.fa"
-bed = "$(dirname)/bed/regions_of_interest.bed"
-bams1 = "$(dirname)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam","g1_s5.bam"]
-bams2 = "$(dirname)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
+dir_name = "/path/to/data/"
+fa = "$(dir_name)/fasta/reference.fa"
+bed = "$(dir_name)/bed/regions_of_interest.bed"
+bams1 = "$(dir_name)/bam/".*["g1_s1.bam","g1_s2.bam","g1_s3.bam","g1_s4.bam","g1_s5.bam"]
+bams2 = "$(dir_name)/bam/".*["g2_s1.bam","g2_s2.bam","g2_s3.bam","g2_s4.bam","g2_s5.bam"]
 
 # Output paths
 prefix = "cpeltdm"
-outdir = "$(dirname)/cpeltdm-matched/"
+outdir = "$(dir_name)/cpeltdm-matched/"
 
 # Run matched analysis
 cpel_tdm(bams1,bams2,bed,fa,outdir,prefix;pe=true,matched=true)
