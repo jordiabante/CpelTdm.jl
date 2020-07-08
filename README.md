@@ -29,6 +29,13 @@ CpelTdm is tested against Julia `1.3.0` on the latest versions of Linux, macOS a
 (v1.3) pkg> add https://github.com/jordiabante/CpelTdm.jl.git
 ```
 
+### Updating
+
+`CpelTdm` and dependencies can be updated via the following command in julia's REPL:
+```julia
+(v1.3) pkg> update CpelTdm
+```
+
 ## Running the tests
 
 In order to test the package to ensure that it has been properly installed,
