@@ -64,7 +64,7 @@ end # end gen_x_mc
     # Examples
     ```julia-repl
     julia> m=5; n=[5]; θ1=[0.5,0.5,0.25]; θ2=[0.5,0.5,0.25];
-    julia> tmml,tnme,tcmd = CpelTdm.unmatched_sim(m,n,θ1,θ2)
+    julia> tmml,tnme,tpdm = CpelTdm.unmatched_sim(m,n,θ1,θ2)
     ```
 """
 function unmatched_sim(m::Int64,n::Vector{Int64},θ1::Vector{Float64},θ2::Vector{Float64})::NTuple{3,Vector{NTuple{2,Float64}}}
@@ -72,7 +72,7 @@ function unmatched_sim(m::Int64,n::Vector{Int64},θ1::Vector{Float64},θ2::Vecto
     # Generate 1k data-sets
     tmml = Vector{NTuple{2,Float64}}()
     tnme = Vector{NTuple{2,Float64}}()
-    tcmd = Vector{NTuple{2,Float64}}()
+    tpdm = Vector{NTuple{2,Float64}}()
     while length(tmml)<1000
         
         ## Generate data
@@ -104,17 +104,17 @@ function unmatched_sim(m::Int64,n::Vector{Int64},θ1::Vector{Float64},θ2::Vecto
         end
 
         ## Compute unmatched pvals
-        tmml_data,tnme_data,tcmd_data = unmat_tests(n,g1_θs,g2_θs)
+        tmml_data,tnme_data,tpdm_data = unmat_tests(n,g1_θs,g2_θs)
 
         # Append
         push!(tmml,tmml_data)
         push!(tnme,tnme_data)
-        push!(tcmd,tcmd_data)
+        push!(tpdm,tpdm_data)
 
     end
     
     # Return p-values
-    return tmml,tnme,tcmd
+    return tmml,tnme,tpdm
 
 end
 """
@@ -125,7 +125,7 @@ end
     # Examples
     ```julia-repl
     julia> m=5; n=[5]; θ1=[0.5,0.5,0.25]; θ2=[0.5,0.5,0.25];
-    julia> tmml,tnme,tcmd = CpelTdm.matched_sim(m,n,θ1,θ2)
+    julia> tmml,tnme,tpdm = CpelTdm.matched_sim(m,n,θ1,θ2)
     ```
 """
 function matched_sim(m::Int64,n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}})::NTuple{3,Vector{NTuple{2,Float64}}}
@@ -133,7 +133,7 @@ function matched_sim(m::Int64,n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2
     # Generate 1k data-sets
     tmml = Vector{NTuple{2,Float64}}()
     tnme = Vector{NTuple{2,Float64}}()
-    tcmd = Vector{NTuple{2,Float64}}()
+    tpdm = Vector{NTuple{2,Float64}}()
     while length(tmml)<1000
         
         ## Generate data
@@ -165,16 +165,16 @@ function matched_sim(m::Int64,n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2
         end
 
         ## Compute unmatched pvals
-        tmml_data,tnme_data,tcmd_data = mat_tests(n,g1_θs,g2_θs)
+        tmml_data,tnme_data,tpdm_data = mat_tests(n,g1_θs,g2_θs)
 
         # Append
         push!(tmml,tmml_data)
         push!(tnme,tnme_data)
-        push!(tcmd,tcmd_data)
+        push!(tpdm,tpdm_data)
 
     end
     
     # Return p-values
-    return tmml,tnme,tcmd
+    return tmml,tnme,tpdm
 
 end

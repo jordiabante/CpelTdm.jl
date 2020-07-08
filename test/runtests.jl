@@ -38,14 +38,14 @@ end
 @testset "Hypothesis Testing" begin
     # Unmatched test
     n=[10]; θ1s=fill([0.0,0.0],5); θ2s=fill([0.0,2.5],5);
-    tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    tmml_test,tnme_test,tpdm_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
     @test tmml_test == (0.0, 1.0)
     @test tnme_test == (0.84782978, 0.007936507936507936)
-    @test tcmd_test == (0.43786215630140846, 0.007936507936507936)
+    @test tpdm_test == (0.43786215630140846, 0.007936507936507936)
     # Matched test
     n=[10]; θ1s=fill([0.0,0.0],5); θ2s=fill([0.0,2.5],5);
-    tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
+    tmml_test,tnme_test,tpdm_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     @test tmml_test == (0.0, 1.0)
     @test tnme_test == (0.84782978, 0.0625)
-    @test tcmd_test[1] == 0.4378621563014087
+    @test tpdm_test[1] == 0.4378621563014087
 end

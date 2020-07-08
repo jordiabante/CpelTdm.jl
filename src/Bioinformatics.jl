@@ -323,7 +323,7 @@ function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed
     end
 
     # Differentiial analysis bedGraph output files
-    out_diff_paths = "$(outdir)/$(outprefix)_" .* ["tmml","tnme","tcmd"] .* "_diff_analysis.bedGraph"
+    out_diff_paths = "$(outdir)/$(outprefix)_" .* ["tmml","tnme","tpdm"] .* "_diff_analysis.bedGraph"
     
     # Check for existance of at least an output files
     if any(isfile.(out_diff_paths))
@@ -679,12 +679,12 @@ function write_diff_out(out_pmap::Vector{RoiData},diff_paths::Vector{String})::N
         # Get data from ROI
         tmml,pmml = roi.mml_test
         tnme,pnme = roi.nme_test
-        tcmd,pcmd = roi.cmd_test
+        tpdm,pcmd = roi.cmd_test
 
         # Write
         write(ios[1],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tmml)\t$(pmml)\n")
         write(ios[2],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tnme)\t$(pnme)\n")
-        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tcmd)\t$(pcmd)\n")
+        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tpdm)\t$(pcmd)\n")
 
     end
 
@@ -895,7 +895,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
         θ2s = roi_data.θ2s[ind]
         
         # Perform matched differential analysis
-        tmml_test,tnme_test,tcmd_test = mat_tests(roi_data.n_vec,θ1s,θ2s)
+        tmml_test,tnme_test,tpdm_test = mat_tests(roi_data.n_vec,θ1s,θ2s)
 
     else
         
@@ -909,7 +909,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
         θ2s = roi_data.θ2s[roi_data.analyzed2]
         
         # Perform unmatched differential analysis
-        tmml_test,tnme_test,tcmd_test = unmat_tests(roi_data.n_vec,θ1s,θ2s)    
+        tmml_test,tnme_test,tpdm_test = unmat_tests(roi_data.n_vec,θ1s,θ2s)    
         
     end
     
@@ -919,7 +919,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
     # Store results
     roi_data.mml_test = tmml_test
     roi_data.nme_test = tnme_test
-    roi_data.cmd_test = tcmd_test
+    roi_data.cmd_test = tpdm_test
 
     # Return
     return roi_data

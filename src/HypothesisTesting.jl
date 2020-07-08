@@ -187,7 +187,7 @@ end
 """
     `comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)`
 
-    Function that produces a permutation statistic for Tcmd in unmatched case.
+    Function that produces a permutation statistic for tpdm in unmatched case.
 
     # Examples
     ```julia-repl
@@ -224,13 +224,13 @@ end
     ```julia-repl
     julia> using Random; Random.seed!(1234);
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
     ((0.7782325400000001, 0.007936507936507936), (0.0, 1.0), (0.3253066763538721, 0.007936507936507936))
     julia> n=[10]; θ1s=fill([0.5,0.5],8); θ2s=fill([-0.5,0.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
     ((0.77823254, 0.0020833333333333333), (0.0, 1.0), (0.325306676353872, 0.0020833333333333333))
     julia> n=[10]; θ1s=fill([0.0,0.0],8); θ2s=fill([0.0,2.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.unmat_tests(n,θ1s,θ2s)
     ((0.0, 1.0), (0.84782978, 0.0010309278350515464), (0.43786215630140907, 0.0010309278350515464))
     ```
 """
@@ -243,7 +243,7 @@ function unmat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector
     # Compute observed stats
     tmml_obs = comp_unmat_stat_mml(n,∇logZ1s,∇logZ2s)
     tnme_obs = comp_unmat_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
-    tcmd_obs = comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    tpdm_obs = comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
 
     # Compute number of possible randomizations
     L = binomial(length(θ1s)+length(θ2s),length(θ1s))
@@ -268,23 +268,23 @@ function unmat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector
     # Use method for random permutation
     tmml_perms = map(x->comp_unmat_perm_stat_mml(n,∇logZ1s,∇logZ2s,x),comb_iter_used)
     tnme_perms = map(x->comp_unmat_perm_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
-    tcmd_perms = map(x->comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
+    tpdm_perms = map(x->comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
 
     # Compute p-values two-sided test
     if exact
         # Compute exact p-value
         tmml_pval = sum(abs.(tmml_perms).>=abs(tmml_obs))/length(tmml_perms)
         tnme_pval = sum(abs.(tnme_perms).>=abs(tnme_obs))/length(tnme_perms)
-        tcmd_pval = sum(tcmd_perms.>=tcmd_obs)/length(tcmd_perms)
+        tpdm_pval = sum(tpdm_perms.>=tpdm_obs)/length(tpdm_perms)
     else
         # Compute p-value in MC setting
         tmml_pval = (1.0+sum(abs.(tmml_perms).>=abs(tmml_obs)))/(1.0+length(tmml_perms))
         tnme_pval = (1.0+sum(abs.(tnme_perms).>=abs(tnme_obs)))/(1.0+length(tnme_perms))
-        tcmd_pval = (1.0+sum(tcmd_perms.>=tcmd_obs))/(1.0+length(tcmd_perms))
+        tpdm_pval = (1.0+sum(tpdm_perms.>=tpdm_obs))/(1.0+length(tpdm_perms))
     end
 
     # Return stat-pval pairs
-    return (tmml_obs,tmml_pval),(tnme_obs,tnme_pval),(tcmd_obs,tcmd_pval)
+    return (tmml_obs,tmml_pval),(tnme_obs,tnme_pval),(tpdm_obs,tpdm_pval)
     
 end
 ###################################################################################################
@@ -441,13 +441,13 @@ end
     ```julia-repl
     julia> using Random; Random.seed!(1234);
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000001, 0.0625), (0.0, 1.0), (0.3253066763538722, 0.03125))
     julia> n=[10]; θ1s=fill([0.5,0.5],8); θ2s=fill([-0.5,0.5],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000002, 0.00390625), (0.0, 1.0), (0.3253066763538723, 1.0))
     julia> n=[4]; θ1s=fill([0.5,0.5],8); θ2s=fill([0.0,0.0],8);
-    julia> tmml_test,tnme_test,tcmd_test = CpelTdm.mat_tests(n,θ1s,θ2s)
+    julia> tmml_test,tnme_test,tpdm_test = CpelTdm.mat_tests(n,θ1s,θ2s)
     ((0.7782325400000002, 0.00390625), (0.0, 1.0), (0.3253066763538723, 1.0))
     ```
 """
@@ -460,7 +460,7 @@ function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{V
     # Compute observed stats
     mml_diffs = comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
     nme_diffs = comp_mat_diff_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
-    tcmd_obs = comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    tpdm_obs = comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
 
     # Get group label combinations to use
     exact = 2^length(θ1s)<Lmax
@@ -486,6 +486,6 @@ function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{V
     end
 
     # Return (stat,pval) pairs
-    return (tmml_obs,tmml_pval),(tnme_obs,tnme_pval),(tcmd_obs,NaN)
+    return (tmml_obs,tmml_pval),(tnme_obs,tnme_pval),(tpdm_obs,NaN)
     
 end
