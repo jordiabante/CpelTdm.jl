@@ -156,7 +156,7 @@ function comp_unmat_perm_stat_nme(n::Vector{Int64},θ1s::Vector{Vector{Float64}}
     
 end
 """
-    `comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)`
+    `comp_unmat_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s)`
 
     Function that computes test statistic Tgsd in unmatched case.
 
@@ -165,11 +165,11 @@ end
     julia> n=[5]; θ1s=[[-1.0,1.0],[-1.0,1.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
     julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
     julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelTdm.comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> CpelTdm.comp_unmat_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
     0.7888652058295635
     ```
 """
-function comp_unmat_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
+function comp_unmat_stat_pdm(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
     ∇logZ1s::Vector{Vector{Float64}},∇logZ2s::Vector{Vector{Float64}})::Float64
     
     ## Compute stat
@@ -185,7 +185,7 @@ function comp_unmat_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s
 
 end
 """
-    `comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)`
+    `comp_unmat_perm_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)`
 
     Function that produces a permutation statistic for tpdm in unmatched case.
 
@@ -194,11 +194,11 @@ end
     julia> n=[10]; θ1s=fill([0.5,0.5],5); θ2s=fill([-0.5,0.5],5); perm_ids=[1,3,5,7,9];
     julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
     julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelTdm.comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
+    julia> CpelTdm.comp_unmat_perm_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s,perm_ids)
     0.1691594717040136
     ```
 """
-function comp_unmat_perm_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
+function comp_unmat_perm_stat_pdm(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
     ∇logZ1s::Vector{Vector{Float64}},∇logZ2s::Vector{Vector{Float64}},perm_ids::Vector{Int64})::Float64
 
     # Get vectors for each group
@@ -212,7 +212,7 @@ function comp_unmat_perm_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}}
     deleteat!(∇logZ2sp,perm_ids)  
 
     # Return
-    return comp_unmat_stat_cmd(n,θ1sp,θ2sp,∇logZ1sp,∇logZ2sp)
+    return comp_unmat_stat_pdm(n,θ1sp,θ2sp,∇logZ1sp,∇logZ2sp)
     
 end
 """
@@ -243,7 +243,7 @@ function unmat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector
     # Compute observed stats
     tmml_obs = comp_unmat_stat_mml(n,∇logZ1s,∇logZ2s)
     tnme_obs = comp_unmat_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
-    tpdm_obs = comp_unmat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    tpdm_obs = comp_unmat_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
 
     # Compute number of possible randomizations
     L = binomial(length(θ1s)+length(θ2s),length(θ1s))
@@ -268,7 +268,7 @@ function unmat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector
     # Use method for random permutation
     tmml_perms = map(x->comp_unmat_perm_stat_mml(n,∇logZ1s,∇logZ2s,x),comb_iter_used)
     tnme_perms = map(x->comp_unmat_perm_stat_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
-    tpdm_perms = map(x->comp_unmat_perm_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
+    tpdm_perms = map(x->comp_unmat_perm_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s,x),comb_iter_used)
 
     # Compute p-values two-sided test
     if exact
@@ -405,7 +405,7 @@ function comp_mat_perm_stats(diffs::Vector{Float64},js::Vector{Int64})::Vector{F
 
 end
 """
-    `comp_mat_stat_cmd(n,θ1s,θ2s)`
+    `comp_mat_stat_pdm(n,θ1s,θ2s)`
 
     Function that computes GJSD between pairs (matched case).
 
@@ -414,11 +414,11 @@ end
     julia> n=[5]; θ1s=[[-1.0,1.0],[-1.0,1.0]]; θ2s=[[1.0,1.0],[1.0,1.0]];
     julia> ∇logZ1s = [CpelTdm.get_∇logZ(n,θ1) for θ1 in θ1s];
     julia> ∇logZ2s = [CpelTdm.get_∇logZ(n,θ2) for θ2 in θ2s];
-    julia> CpelTdm.comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    julia> CpelTdm.comp_mat_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
     0.7888652058295635
     ```
 """
-function comp_mat_stat_cmd(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
+function comp_mat_stat_pdm(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{Vector{Float64}},
     ∇logZ1s::Vector{Vector{Float64}},∇logZ2s::Vector{Vector{Float64}})::Float64
     
     # Compute stat
@@ -460,7 +460,7 @@ function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{V
     # Compute observed stats
     mml_diffs = comp_mat_diff_mml(n,∇logZ1s,∇logZ2s)
     nme_diffs = comp_mat_diff_nme(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
-    tpdm_obs = comp_mat_stat_cmd(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
+    tpdm_obs = comp_mat_stat_pdm(n,θ1s,θ2s,∇logZ1s,∇logZ2s)
 
     # Get group label combinations to use
     exact = 2^length(θ1s)<Lmax

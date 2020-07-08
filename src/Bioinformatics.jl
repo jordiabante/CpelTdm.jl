@@ -679,12 +679,12 @@ function write_diff_out(out_pmap::Vector{RoiData},diff_paths::Vector{String})::N
         # Get data from ROI
         tmml,pmml = roi.mml_test
         tnme,pnme = roi.nme_test
-        tpdm,pcmd = roi.cmd_test
+        tpdm,ppdm = roi.pdm_test
 
         # Write
         write(ios[1],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tmml)\t$(pmml)\n")
         write(ios[2],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tnme)\t$(pnme)\n")
-        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tpdm)\t$(pcmd)\n")
+        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tpdm)\t$(ppdm)\n")
 
     end
 
@@ -919,7 +919,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
     # Store results
     roi_data.mml_test = tmml_test
     roi_data.nme_test = tnme_test
-    roi_data.cmd_test = tpdm_test
+    roi_data.pdm_test = tpdm_test
 
     # Return
     return roi_data
