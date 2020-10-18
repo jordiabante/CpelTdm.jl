@@ -25,6 +25,7 @@ CpelTdm is tested against Julia `1.3.0` on the latest versions of Linux, macOS a
 ### Installing
 
 `CpelTdm` and dependencies can be installed via the following command in julia's REPL:
+
 ```julia
 (v1.3) pkg> add https://github.com/jordiabante/CpelTdm.jl.git
 ```
@@ -32,6 +33,7 @@ CpelTdm is tested against Julia `1.3.0` on the latest versions of Linux, macOS a
 ### Updating
 
 `CpelTdm` and dependencies can be updated via the following command in julia's REPL:
+
 ```julia
 (v1.3) pkg> update CpelTdm
 ```
@@ -40,9 +42,11 @@ CpelTdm is tested against Julia `1.3.0` on the latest versions of Linux, macOS a
 
 In order to test the package to ensure that it has been properly installed,
 run the following command in a `julia` session:
+
 ```julia
 (v1.3) pkg> test CpelTdm
 ```
+
 If the package has been properly installed, then all tests will be successful.
 
 ## Authors
@@ -57,4 +61,4 @@ file for details.
 ## References
 
 [1] Abante, J., Goutsias, J., CpelTdm.jl: a Julia package for targeted differential 
-DNA methylation analysis, *Bioinformatics* 2020 XYZ.
+DNA methylation analysis, *bioArxiv* (2020), 343020.

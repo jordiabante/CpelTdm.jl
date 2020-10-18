@@ -902,7 +902,7 @@ function pmap_anal_roi(roi::BED.Record,chr::String,chr_size::Int64,bams1::Vector
         # Check if sufficient data
         s1 = sum(roi_data.analyzed1)
         s2 = sum(roi_data.analyzed2)
-        1/binomial(s1+s2,s1)<0.05 || return roi_data
+        1.0/binomial(s1+s2,s1)<0.05 || return roi_data
         
         # Get samples with data
         θ1s = roi_data.θ1s[roi_data.analyzed1]
