@@ -1,8 +1,8 @@
+# Description
+
 ![CI](https://github.com/jordiabante/CpelTdm.jl/workflows/CI/badge.svg)
 ![Docs](https://github.com/jordiabante/CpelTdm.jl/workflows/Docs/badge.svg)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/jordiabante/CpelTdm.jl/blob/master/LICENSE.md)
-
-## Description
 
 CpelTdm is a julia package designed to perform DNA methylation differential analysis. 
 The package is based on a recently published method [1], and has several advantages when 

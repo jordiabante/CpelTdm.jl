@@ -366,7 +366,7 @@ function split_bed_record(bed_rec::BED.Record,max_size_anal_reg::Int64)::Vector{
     ## When read in by BED.jl the start becomes one-based.
 
     # Get size of record
-    size_rec = BED.chromend(bed_rec) - BED.chromstart(bed_rec)
+    size_rec = BED.chromend(bed_rec) - BED.chromstart(bed_rec) + 1
 
     # Initialize
     recs = Vector{BED.Record}()
@@ -417,7 +417,7 @@ end
     Function that dvides regions of interest in BED into analysis regions.
 
     # Examples
-    ```julia-repl
+    ```julia-repl using CpelTdm
     julia> max_size_anal_reg = 500;
     julia> bed_out = CpelTdm.get_bed_out_filename(bed);
     julia> CpelTdm.gen_anal_reg_file(bed,bed_out,max_size_anal_reg)
@@ -434,14 +434,14 @@ function gen_anal_reg_file(bed::String,bed_out::String,max_size_anal_reg::Int64)
     anal_regs = Vector{BED.Record}()
     while !eof(reader)
         # Get record
-        read!(reader, record)
+        read!(reader,record)
         # Append new analysis regions
         append!(anal_regs,split_bed_record(record,max_size_anal_reg))
     end
     close(reader)
 
     # Write new BED file
-    output = open(bed_out, "a")
+    output = open(bed_out,"a")
     writer = BED.Writer(output)
     while length(anal_regs)>0
         write(writer,popfirst!(anal_regs))
@@ -977,7 +977,7 @@ end
 """
     `cpel_tdm(BAMS1,BAMS2,BED,FASTA,OUTDIR,PREFIX)`
 
-    Function to call to CpelTdm analysis. 
+    Function to call to run CpelTdm analysis. 
 
         - BAMS1: BAM files associated to group 1 (require index file).
         - BAMS2: BAM files associated to group 2 (require index file).
@@ -1018,7 +1018,7 @@ function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta:
     ## Define analysis regions
     print_log("Defining analysis regions from BED file ...")
 
-    # Divide BED file divided into analysis regions
+    # Divide BED file into analysis regions
     bed_out = get_bed_out_filename(bed)
     gen_anal_reg_file(bed,bed_out,max_size_anal_reg)
 
