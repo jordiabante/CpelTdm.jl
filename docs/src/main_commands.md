@@ -22,7 +22,6 @@ data, hence we set `pe=true`. However, if the sequencing data were
 single end, we would set `pe=false` instead.
 
 ```julia
-
 # Load dependencies
 using Distributed
 @everywhere using CpelTdm
@@ -40,7 +39,6 @@ outdir = "$(dir_name)/cpeltdm-unmatched/"
 
 # Run matched analysis
 cpel_tdm(bams1,bams2,bed,fa,outdir,prefix;pe=true,matched=false)
-
 ```
 
 If you wish to run CpelTdm on a cluster, we recommend you store
@@ -62,7 +60,6 @@ comparison. In addition, here we assume that we are using paired
 end sequencing data, hence we set `pe=true`. 
 
 ```julia
-
 # Load dependencies
 using Distributed
 @everywhere using CpelTdm
@@ -80,7 +77,6 @@ outdir = "$(dir_name)/cpeltdm-matched/"
 
 # Run matched analysis
 cpel_tdm(bams1,bams2,bed,fa,outdir,prefix;pe=true,matched=true)
-
 ```
 
 Similar to the unmatched case, if you wish to run CpelTdm on a 

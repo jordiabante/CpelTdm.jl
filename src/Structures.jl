@@ -15,13 +15,13 @@ end
 
 # CpelTdm Configuration
 mutable struct CpeltdmConfig
-    pe::Bool                        # Paired/Single end
-    min_cov::Int64                  # Minimum coverage accepted
-    matched::Bool                   # Matched vs unmatched group comparison
-    bound_check::Bool               # Parameter space boundary check
-    trim::NTuple{4,Int64}           # Trimming of reads
-    max_size_subreg::Int64          # Maximum size subregion (determines K)
-    max_size_anal_reg::Int64        # Maximum size of analysis region
+    pe::Bool                                # Paired/Single end
+    min_cov::Union{Int64,Float64}           # Minimum coverage accepted
+    matched::Bool                           # Matched vs unmatched group comparison
+    bound_check::Bool                       # Parameter space boundary check
+    trim::NTuple{4,Union{Int64,Float64}}    # Trimming of reads
+    max_size_subreg::Union{Int64,Float64}   # Maximum size subregion (determines K)
+    max_size_anal_reg::Union{Int64,Float64} # Maximum size of analysis region
     # Initializing method
     CpeltdmConfig(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg) = 
         new(pe,min_cov,matched,bound_check,trim,max_size_subreg,max_size_anal_reg)

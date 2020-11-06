@@ -1,57 +1,6 @@
 ###################################################################################################
-# CONSTANTS
+# BIOINFORMATICS FUNCTIONS
 ###################################################################################################
-const BG_BUFFER = 50000                     # Bytes of bedGraph records until write
-const GFF_BUFFER = 500000                   # Bytes of GFF records until write
-const THRESH_MAPQ = 39                      # MAPQ threshold (-10*log(p)) only true uni-reads
-const FLAGS_ALLOWED = [0,16,83,99,147,163]  # Flags allowed in BAM recs
-###################################################################################################
-# FUNCTIONS
-###################################################################################################
-"""
-    `print_log(MESSAGE)`
-
-    Function that prints MESSAGE to stderr.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.print_log("Hello")
-    [2020-03-30 16:24:18]: Hello
-    ```
-"""
-function print_log(mess::String)::Nothing
-
-    # Right format for date
-    date = Dates.format(now(), "yyyy-mm-dd HH:MM:SS")
-    println(stderr,"[$(date)]: "  * mess)
-    flush(stderr)
-
-    # Return
-    return nothing
-
-end
-"""
-    `sleep_exit(MESSAGE)`
-
-    Function that prints MESSAGE, waits 5 seconds and exits without error.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.sleep_exit("Bye")
-    [2020-03-30 16:24:18]: Bye
-    ```
-"""
-function sleep_exit(mess::String)::Nothing
-
-    # Print message
-    print_log(mess)
-    sleep(10)
-    exit(0)
-
-    # Return
-    return nothing
-
-end
 """
     `get_align_strand(PAIRED_END,FLAG1,FLAG2)`
 
@@ -213,7 +162,7 @@ end # try_olaps
     ```
 """
 function read_bam(bam::String,chr::String,roi_st::Int64,roi_end::Int64,cpg_pos::Vector{Int64},
-                  chr_size::Int64,pe::Bool,trim::NTuple{4,Int64})::Array{Vector{Int64},1}
+                  chr_size::Int64,pe::Bool,trim::NTuple{4,Union{Int64,Float64}})::Array{Vector{Int64},1}
 
     # Number of CpG sites is determined by that in the region
     N = length(cpg_pos)
@@ -278,63 +227,6 @@ function read_bam(bam::String,chr::String,roi_st::Int64,roi_end::Int64,cpg_pos::
 
 end # end read_bam
 """
-    `get_paths(BAMS1,BAMS2,FASTA,BED,OUTDIR,OUTPREFIX)`
-
-    Function that returns output file names.
-
-    # Examples
-    ```julia-repl
-    julia> out_mml_paths,out_nme_paths,out_diff_paths = CpelTdm.get_paths(bams1,bams2,fasta,bed,outdir,outprefix)
-    ```
-"""
-function get_paths(bams1::Vector{String},bams2::Vector{String},fasta::String,bed::String,outdir::String,
-                   outprefix::String)::NTuple{3,Vector{String}}
-
-    # Check BED file exists
-    if !isfile(bed)
-        sleep_exit("BED file was not found ...")
-    end
-
-    # Check FASTA index file exists
-    if !all([isfile(fasta),isfile(fasta*".fai")])
-        sleep_exit("Fasta reference and/or index were not found ...")
-    end
-    
-    # Check BAM index files exists
-    ind_miss = false
-    for bam in vcat(bams1,bams2)
-        if !all([isfile(bam),isfile(bam*".bai")])
-            ind_miss |= true
-            print_log("BAM and/or its index file missing for")
-            print_log("$(bam)")
-        end
-    end
-    ind_miss && sleep_exit("Index files missing ...")
-
-    # Individual bedGraph output files
-    prefixes = [String(split(basename(bam),".")[1]) for bam in bams1]
-    append!(prefixes,[String(split(basename(bam),".")[1]) for bam in bams2])
-    out_mml_paths = ["$(outdir)/$(prefix)_mml.bedGraph" for prefix in prefixes]
-    out_nme_paths = ["$(outdir)/$(prefix)_nme.bedGraph" for prefix in prefixes]
-    
-    # Check for existance of at least an output files
-    if any(isfile.(vcat(out_mml_paths,out_nme_paths)))
-        sleep_exit("At least an MML or NME file already exists...")
-    end
-
-    # Differentiial analysis bedGraph output files
-    out_diff_paths = "$(outdir)/$(outprefix)_" .* ["tmml","tnme","tpdm"] .* "_diff_analysis.bedGraph"
-    
-    # Check for existance of at least an output files
-    if any(isfile.(out_diff_paths))
-        sleep_exit("At least a differential output file already exists...")
-    end
-
-    # Return paths
-    return out_mml_paths,out_nme_paths,out_diff_paths
-    
-end
-"""
     `split_bed_record(bed_rec,max_size_anal_reg)`
 
     Function that splits regions of interest in BED into analysis regions.
@@ -357,7 +249,7 @@ end
                 name: .
     ```
 """
-function split_bed_record(bed_rec::BED.Record,max_size_anal_reg::Int64)::Vector{BED.Record}
+function split_bed_record(bed_rec::BED.Record,max_size_anal_reg::Union{Int64,Float64})::Vector{BED.Record}
 
     ## BED files are:
     ## - 0-based coordinates
@@ -396,22 +288,6 @@ function split_bed_record(bed_rec::BED.Record,max_size_anal_reg::Int64)::Vector{
 
 end
 """
-    `get_bed_out_filename(bed)`
-
-    Function that returns name of output BED file.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.get_bed_out_filename(bed)
-    ```
-"""
-function get_bed_out_filename(bed::String)::String
-
-    # Return name
-    return dirname(bed) * "/" * split(basename(bed),".")[1] * "_cpel.bed" 
-    
-end
-"""
     `gen_anal_reg_file(bed,max_size_anal_reg)`
 
     Function that dvides regions of interest in BED into analysis regions.
@@ -423,7 +299,7 @@ end
     julia> CpelTdm.gen_anal_reg_file(bed,bed_out,max_size_anal_reg)
     ```
 """
-function gen_anal_reg_file(bed::String,bed_out::String,max_size_anal_reg::Int64)::Nothing
+function gen_anal_reg_file(bed::String,bed_out::String,max_size_anal_reg::Union{Int64,Float64})::Nothing
 
     # Check if BED file already exists
     isfile(bed_out) && (print_log("Found existing CpelTdm BED file ..."); return nothing)   
@@ -527,7 +403,7 @@ end
     2
     ```
 """
-function get_ns!(roi_data::RoiData,max_size_subreg::Int64)::Nothing
+function get_ns!(roi_data::RoiData,max_size_subreg::Union{Int64,Float64})::Nothing
 
     # Check if need to partition
     if (roi_data.chrend-roi_data.chrst)<=max_size_subreg
@@ -586,205 +462,6 @@ function mean_cov(xobs::Array{Vector{Int64},1})::Float64
 
     # Return 0 if no observations
     return length(xobs)>0 ? norm(hcat(xobs...),1)/length(xobs[1]) : 0.0
-
-end
-"""
-    `write_mml_out(OUT_PMAP,MML_PATHS)`
-
-    Function that writes MML in corresponding bedGraph files.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.write_mml_out(out_pmap,mml_paths)
-    ```
-"""
-function write_mml_out(out_pmap::Vector{RoiData},mml_paths::Vector{String})::Nothing
-    
-    # Open streams
-    ios = [open(path,"a") for path in mml_paths]
-    
-    # Loop over ROIs
-    @inbounds for roi in out_pmap
-        
-        # Get data from ROI
-        mmls = vcat(roi.mmls1,roi.mmls2)
-        
-        # Write
-        @inbounds for i=1:length(ios)
-            write(ios[i],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(mmls[i])\n")
-        end
-
-    end
-
-    # Close all streams
-    close.(ios)
-
-    # Return nothing
-    return nothing
-
-end
-"""
-    `write_nme_out(OUT_PMAP,NME_PATHS)`
-
-    Function that writes NME in corresponding bedGraph files.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.write_nme_out(out_pmap,nme_paths)
-    ```
-"""
-function write_nme_out(out_pmap::Vector{RoiData},nme_paths::Vector{String})::Nothing
-    
-    # Open streams
-    ios = [open(path,"a") for path in nme_paths]
-    
-    # Loop over ROIs
-    @inbounds for roi in out_pmap
-
-        # Get data from ROI
-        nmes = vcat(roi.nmes1,roi.nmes2)
-        
-        # Write
-        @inbounds for i=1:length(ios)
-            write(ios[i],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(nmes[i])\n")
-        end
-
-    end
-
-    # Close all streams
-    close.(ios)
-
-    # Return nothing
-    return nothing
-
-end
-"""
-    `write_diff_out(OUT_PMAP,DIFF_PATHS)`
-
-    Function that writes differential output in corresponding bedGraph files.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.write_diff_out(out_pmap,diff_paths)
-    ```
-"""
-function write_diff_out(out_pmap::Vector{RoiData},diff_paths::Vector{String})::Nothing
-    
-    # Open streams
-    ios = [open(path,"a") for path in diff_paths]
-
-    # Loop over ROIs
-    @inbounds for roi in out_pmap
-        
-        # Get data from ROI
-        tmml,pmml = roi.mml_test
-        tnme,pnme = roi.nme_test
-        tpdm,ppdm = roi.pdm_test
-
-        # Write
-        write(ios[1],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tmml)\t$(pmml)\n")
-        write(ios[2],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tnme)\t$(pnme)\n")
-        write(ios[3],"$(roi.chr)\t$(roi.chrst-1)\t$(roi.chrend)\t$(tpdm)\t$(ppdm)\n")
-
-    end
-
-    # Close all streams
-    close.(ios)
-
-    # Return nothing
-    return nothing
-
-end
-"""
-    `write_output(OUT_PMAP,OUT_PATHS)`
-
-    Function that write output of pmap into respective files.
-
-    # Examples
-    ```julia-repl
-    julia> CpelTdm.write_output(out_pmap,out_paths)
-    ```
-"""
-function write_output(out_pmap::Vector{RoiData},out_paths::NTuple{3,Vector{String}})::Nothing
-
-    # Assign paths 
-    mml_paths = out_paths[1]
-    nme_paths = out_paths[2]
-    diff_paths = out_paths[3]
-
-    # Write MML
-    write_mml_out(out_pmap,mml_paths)
-
-    # Write NMEs
-    write_nme_out(out_pmap,nme_paths)
-
-    # Write differential analysis
-    write_diff_out(out_pmap,diff_paths)
-
-    # Return nothing
-    return nothing
-
-end
-"""
-    `add_qvalues_to_path(PATH)`
-
-    Function that takes in the differential output and adds BH q-value.
-
-    # Examples
-    ```julia-repl
-    julia> CpelAsm.add_qvalues_to_path(path)
-    ```
-"""
-function add_qvalues_to_path(path::String)::Nothing
-
-    # Leave if no data
-    filesize(path)>0 || return nothing
-    
-    # Get data
-    all_data = readdlm(path,'\t',Any)
-    qvals = fill(NaN,size(all_data)[1])
-    
-    # Multiple hypothesis testing correction
-    ind = .!isnan.(all_data[:,5])
-    if sum(ind)>0 
-        qvals[ind] = MultipleTesting.adjust(convert(Vector{Float64},all_data[ind,5]),BenjaminiHochberg())
-    end
-    
-    # Append to output matrix
-    all_data = hcat(all_data,qvals)
-    
-    # Write to temp output
-    temp_path = path * ".tmp"
-    open(temp_path,"w") do io
-        writedlm(io,all_data,'\t')
-    end
-
-    # Move to original file
-    mv(temp_path,path,force=true)
-
-    # Return
-    return nothing
-
-end
-"""
-    `mult_hyp_corr(DIFF_PATHS)`
-
-    Function that takes in all the differential output and adds BH q-value in each one.
-
-    # Examples
-    ```julia-repl
-    julia> CpelAsm.mult_hyp_corr(diff_paths)
-    ```
-"""
-function mult_hyp_corr(diff_paths::Vector{String})
-
-    # Add q-values
-    add_qvalues_to_path(diff_paths[1])
-    add_qvalues_to_path(diff_paths[2])
-    add_qvalues_to_path(diff_paths[3])
-
-    # Return
-    return nothing
 
 end
 """
@@ -992,8 +669,9 @@ end
     ```
 """
 function cpel_tdm(bams1::Vector{String},bams2::Vector{String},bed::String,fasta::String,outdir::String,prefix::String;
-                  pe::Bool=false,max_size_anal_reg::Int64=1000,max_size_subreg::Int64=250,min_cov::Int64=5,
-                  matched::Bool=false,trim::NTuple{4,Int64}=(0,0,0,0),bound_check::Bool=false)::Nothing
+                  pe::Bool=false,max_size_anal_reg::Union{Int64,Float64}=1000,max_size_subreg::Union{Int64,Float64}=250,
+                  min_cov::Union{Int64,Float64}=5,matched::Bool=false,trim::NTuple{4,Union{Int64,Float64}}=(0,0,0,0),
+                  bound_check::Bool=false)::Nothing
 
     # Print initialization of juliASM
     print_log("Starting CpelTdm ...")

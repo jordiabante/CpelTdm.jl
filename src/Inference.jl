@@ -1,9 +1,4 @@
 ###################################################################################################
-# CONSTANTS
-###################################################################################################
-const ETA_MAX_ABS=5.0
-const LOG2 = log(2)                         # Ln(2)
-###################################################################################################
 # FUNCTIONS
 ###################################################################################################
 """
@@ -485,9 +480,43 @@ function comp_cmd(n::Vector{Int64},θ1::Vector{Float64},θ2::Vector{Float64},∇
     cmd = logZ1 + logZ2 - (θ1'*∇logZ1 + θ2'*∇logZ2)
 
     # Normalize 1-CMD
-    cmd /= 2*logZγ - θγ'* (∇logZ1 + ∇logZ2)
+    cmd /= 2.0*logZγ - θγ'* (∇logZ1 + ∇logZ2)
     
     # Return GJSD
     return 1.0 - cmd
+
+end
+"""
+    `comp_cmd_unnorm([N1,...,NK],θ1,θ2,∇logZ1s,∇logZ2s)`
+
+    Function that computes the unnormalized geometric Jensen-Shannon divergence between two Ising models 
+    parametrized by θ1 and θ2, respectively.
+
+    # Examples
+    ```julia-repl
+    julia> n=[20]; θ1=θ2=[1.0,1.0];
+    julia> ∇logZ1s = CpelTdm.get_∇logZ(n,θ1);
+    julia> ∇logZ2s = CpelTdm.get_∇logZ(n,θ2);
+    julia> CpelTdm.comp_cmd_unnorm(n,θ1,θ2,∇logZ1s,∇logZ2s)
+    0.0
+    julia> n=[20]; θ1=[-5.0,5.0]; θ2=[5.0,5.0];
+    julia> ∇logZ1s = CpelTdm.get_∇logZ(n,θ1);
+    julia> ∇logZ2s = CpelTdm.get_∇logZ(n,θ2);
+    julia> CpelTdm.comp_cmd_unnorm(n,θ1,θ2,∇logZ1s,∇logZ2s)
+    1.3880197058418844
+    ```
+"""
+function comp_cmd_unnorm(n::Vector{Int64},θ1::Vector{Float64},θ2::Vector{Float64},∇logZ1::Vector{Float64},∇logZ2::Vector{Float64})::Float64
+
+    # Parameter geometric mixture of Ising
+    θγ = 0.5.*(θ1+θ2)
+
+    # Get partition functions
+    logZ1 = log(comp_Z(n,θ1[1:(end-1)],θ1[end]))
+    logZ2 = log(comp_Z(n,θ2[1:(end-1)],θ2[end]))
+    logZγ = log(comp_Z(n,θγ[1:(end-1)],θγ[end]))
+
+    # Return unnormalized GJSD
+    return 2.0*logZγ - θγ'* (∇logZ1 + ∇logZ2) - (logZ1 + logZ2 - (θ1'*∇logZ1 + θ2'*∇logZ2))
 
 end

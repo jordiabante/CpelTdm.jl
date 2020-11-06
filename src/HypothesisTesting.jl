@@ -489,3 +489,68 @@ function mat_tests(n::Vector{Int64},θ1s::Vector{Vector{Float64}},θ2s::Vector{V
     return (tmml_obs,tmml_pval),(tnme_obs,tnme_pval),(tpdm_obs,NaN)
     
 end
+###################################################################################################
+# MULTIPLE HYPOTHESIS CORRECTION
+###################################################################################################
+"""
+    `add_qvalues_to_path(PATH)`
+
+    Function that takes in the differential output and adds BH q-value.
+
+    # Examples
+    ```julia-repl
+    julia> CpelAsm.add_qvalues_to_path(path)
+    ```
+"""
+function add_qvalues_to_path(path::String)::Nothing
+
+    # Leave if no data
+    filesize(path)>0 || return nothing
+    
+    # Get data
+    all_data = readdlm(path,'\t',Any)
+    qvals = fill(NaN,size(all_data)[1])
+    
+    # Multiple hypothesis testing correction
+    ind = .!isnan.(all_data[:,5])
+    if sum(ind)>0 
+        qvals[ind] = MultipleTesting.adjust(convert(Vector{Float64},all_data[ind,5]),BenjaminiHochberg())
+    end
+    
+    # Append to output matrix
+    all_data = hcat(all_data,qvals)
+    
+    # Write to temp output
+    temp_path = path * ".tmp"
+    open(temp_path,"w") do io
+        writedlm(io,all_data,'\t')
+    end
+
+    # Move to original file
+    mv(temp_path,path,force=true)
+
+    # Return
+    return nothing
+
+end
+"""
+    `mult_hyp_corr(DIFF_PATHS)`
+
+    Function that takes in all the differential output and adds BH q-value in each one.
+
+    # Examples
+    ```julia-repl
+    julia> CpelAsm.mult_hyp_corr(diff_paths)
+    ```
+"""
+function mult_hyp_corr(diff_paths::Vector{String})
+
+    # Add q-values
+    add_qvalues_to_path(diff_paths[1])
+    add_qvalues_to_path(diff_paths[2])
+    add_qvalues_to_path(diff_paths[3])
+
+    # Return
+    return nothing
+
+end
